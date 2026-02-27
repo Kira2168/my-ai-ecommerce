@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* This defines our "Brand" color for 2026 */
+  --color-brand: #00f2ff;
+  
+  /* Adding a custom slow-motion animation for the background aura */
+  --animate-bounce-slow: bounce-slow 10s infinite ease-in-out;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @keyframes bounce-slow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -30px); }
   }
 }
 
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+  --nav-bg: rgba(20, 14, 30, 0.75);
+  --card-bg: #0f0b17;
+  --card-bg-secondary: #151024;
+  --border-color: rgba(255, 255, 255, 0.14);
+  --muted-text: #9ca3af;
+}
+
+/* Update your globals.css sections */
+
+
+/* globals.css */
+
+/* globals.css */
+
+/* globals.css */
+
+/* globals.css */
+
+/* globals.css */
+
+/* globals.css */
+
+html.dark {
+  /* This is the 60/40 Mix: Deepest Blackened Plum */
+  /* It looks black at first glance, but has a clear purple soul */
+  --background: #0d0a1a; 
+  --foreground: #e5e0ff; /* Muted violet-white to reduce glare */
+  
+  --nav-bg: rgba(13, 10, 26, 0.85);
+  
+  /* Cards: Slightly more purple for depth against the dark background */
+  --card-bg: #18142e; 
+  --card-bg-secondary: #1f1a3b;
+  
+  /* The Glow: Subtle borders that catch the purple light */
+  --border-color: rgba(167, 139, 250, 0.15);
+  --muted-text: #8b86a3;
+}
+
+html.light {
+  /* Soft Amethyst Silver - Attractive and themed, NO MORE COLD GREY */
+  --background: #f1eff7; 
+  --foreground: #1a162e; 
+  --nav-bg: rgba(241, 239, 247, 0.85);
+  --card-bg: #ffffff;
+  --card-bg-secondary: #e6e3f2;
+  --border-color: rgba(107, 70, 193, 0.12);
+  --muted-text: #6b6685;
+}
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar to match the attractive UI */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand);
 }
