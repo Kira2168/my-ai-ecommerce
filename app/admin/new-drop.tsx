@@ -149,6 +149,8 @@ export default function NewDropModal({ onClose }: { onClose: () => void }) {
                   <option>TECH</option>
                   <option>APPAREL</option>
                   <option>DIGITAL</option>
+                  <option>ACCESSORIES</option>
+                  <option>DIGITAL</option>
                 </select>
               </div>
             </div>

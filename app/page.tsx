@@ -1,28 +1,95 @@
-// app/page.tsx
+"use client";
 import Link from "next/link";
+import { Terminal, Cpu, ShieldAlert } from "lucide-react";
+import StarField from "@/components/StarField";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand/10 via-transparent to-transparent" />
+    <main className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
       
-      <h1 className="text-7xl font-black text-white tracking-tighter mb-4 z-10">
-        FUTURE <span className="text-brand italic font-light">SHOP</span>
-      </h1>
-      
-      <p className="text-gray-400 max-w-md mb-8 z-10">
-        The world's first e-commerce platform powered by autonomous AI agents.
-      </p>
+      {/* 1. INTERACTIVE STAR FIELD */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <StarField />
+      </div>
 
-      <div className="flex gap-4 z-10">
-        <Link href="/shop" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-brand transition-colors">
-          Enter Store
-        </Link>
-        <Link href="/admin" className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-full hover:bg-white/10 transition-colors">
-          Admin Portal
-        </Link>
+      {/* 2. ANIME VIDEO BACKGROUND (Optional - if used) */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
+      </div>
+
+      {/* 3. GRID OVERLAY */}
+      <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      
+      {/* 4. MAIN UI CONTENT */}
+      <div className="relative z-20 flex flex-col items-center">
+        {/* BUILT BY TAG */}
+        <div className="flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-white/5 bg-white/5 backdrop-blur-md">
+          <Cpu className="w-3 h-3 text-white" />
+          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">
+            Architected by <span className="text-white font-bold">Kirubel</span>
+          </span>
+        </div>
+
+        {/* HERO TITLE */}
+        <h1 className="text-7xl md:text-[11rem] font-black tracking-[-0.05em] leading-none mb-4 uppercase italic bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(125,211,252,0.2)]">
+          LUCY<span className="text-cyan-200 not-italic">.</span>GEBEYA
+        </h1>
+        
+        <p className="text-gray-400 max-w-lg font-mono text-[10px] md:text-xs uppercase tracking-[0.5em] mb-12 leading-relaxed">
+          The world&apos;s first e-commerce platform <br /> 
+          <span className="text-white/40">powered by autonomous AI agents.</span>
+        </p>
+
+        {/* INITIATE ACCESS BUTTON */}
+        <div className="flex flex-col items-center gap-6">
+          <Link 
+  href="/shop" 
+  className="group relative px-14 py-6 transition-all duration-500 overflow-hidden"
+  style={{ clipPath: "polygon(0 15%, 15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%)" }}
+>
+  {/* STATIC BORDER */}
+  <div className="absolute inset-0 border border-cyan-900/30 z-20 pointer-events-none group-hover:border-cyan-400/60 transition-colors duration-500" />
+  
+  {/* BACKGROUND BASE */}
+  <div className="absolute inset-0 bg-cyan-950/10 z-0" />
+
+  {/* RED FILL EFFECT (Fills with a gradient) */}
+  <div className="absolute bottom-0 left-0 w-full h-0 bg-gradient-to-t from-cyan-500 to-violet-500 group-hover:h-full transition-all duration-500 ease-in-out z-10 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]" />
+
+  {/* SCANNING LASER LINE */}
+  <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-300 z-20 opacity-0 group-hover:opacity-100 group-hover:animate-scan transition-opacity" />
+
+  {/* BUTTON TEXT */}
+  <span className="relative z-30 flex items-center gap-3 text-cyan-400 group-hover:text-white font-black uppercase tracking-[0.4em] text-xs transition-colors duration-500">
+    Initiate Access <Terminal className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+  </span>
+
+  {/* EXTERNAL GLOW */}
+  <div className="absolute inset-0 bg-violet-500/0 group-hover:bg-violet-500/25 blur-xl transition-all duration-500 -z-10" />
+</Link>
+
+          {/* --- THE RED ADMIN ENTRANCE (FORCED FIX) --- */}
+          <div className="mt-16 opacity-0 hover:opacity-100 transition-opacity duration-700">
+          <Link 
+  href="/admin/login" 
+  className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.6em] text-white/20 hover:text-red-500 hover:drop-shadow-[0_0_10px_#ff0000] transition-all duration-300"
+>
+  <ShieldAlert className="w-3 h-3" /> 
+  <span className="transition-colors duration-300">
+    Root Terminal Login
+  </span>
+</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER DECOR */}
+      <div className="absolute bottom-8 left-8 flex flex-col items-start gap-1 z-20">
+        <div className="w-12 h-[1px] bg-white/20" />
+        <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest text-left">
+          Origin: Ethiopia<br />Node: 01-Kirubel
+        </span>
       </div>
     </main>
   );
-  
 }

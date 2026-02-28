@@ -1,94 +1,144 @@
-"use client";
-import { useState } from "react";
-import { Plus, Package, DollarSign, Activity, Terminal } from "lucide-react";
-import NewDropModal from "./new-drop"; // Ensure this filename matches your modal file
+import { prisma } from "@/lib/db";
+import { 
+  Package, 
+  DollarSign, 
+  Activity, 
+  Terminal, 
+  ShieldCheck, 
+  ArrowLeft 
+} from "lucide-react";
+import Link from "next/link";
+import NewDropModalWrapper from "./new-drop-wrapper"; 
+import DeleteButton from "./delete-button"; 
 
-export default function AdminDashboard() {
-  // 1. ADD STATE TO TRACK MODAL
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export const dynamic = "force-dynamic";
+
+export default async function AdminDashboard() {
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Calculate stats
+  const totalStock = products.reduce((acc, p) => acc + (p.stock || 0), 0);
+  const revenue = products.reduce((acc, p) => acc + (Number(p.price) * 1.5), 0); 
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] p-8 pt-32 transition-colors duration-500">
+    <div className="min-h-screen bg-[#05040a] text-white p-8 pt-20">
       <div className="max-w-7xl mx-auto">
         
-        {/* DASHBOARD HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        {/* --- TOP NAVIGATION: BACK TO SITE --- */}
+        <div className="flex justify-between items-center mb-12">
+            <Link 
+              href="/" 
+              className="group flex items-center gap-2 text-gray-500 hover:text-white transition-all duration-300"
+            >
+                <div className="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-brand/30 group-hover:bg-brand/5">
+                  <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Exit Terminal</span>
+            </Link>
+            <div className="h-[1px] flex-1 mx-8 bg-gradient-to-r from-white/10 to-transparent" />
+            <div className="text-[9px] font-mono text-white/20 uppercase tracking-widest">
+              Secure Node: 01-Kirubel
+            </div>
+        </div>
+
+        {/* --- HEADER SECTION --- */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
           <div>
-            <h1 className="text-5xl font-black italic tracking-tighter uppercase mb-2">Command Center</h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-[var(--muted-text)]">Root Access Granted // System Stable</p>
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-4 h-4 text-brand" />
+              <span className="text-brand font-mono text-[9px] uppercase tracking-[0.4em] font-bold">Terminal Authenticated</span>
+            </div>
+            <h1 className="text-6xl font-black italic tracking-tighter uppercase">Command Center</h1>
           </div>
-
-          {/* 2. ADD ONCLICK TO OPEN MODAL */}
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-3 bg-brand text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
-          >
-            <Plus className="w-4 h-4" /> Initialize New Drop
-          </button>
+          <NewDropModalWrapper />
         </div>
 
-        {/* QUICK STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <StatCard icon={<DollarSign className="text-brand" />} label="Total Revenue" value="$42,090.00" />
-          <StatCard icon={<Package className="text-brand" />} label="Active Inventory" value="12 Units" />
-          <StatCard icon={<Activity className="text-brand" />} label="System Uptime" value="99.9%" />
+        {/* --- STATS GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <StatCard 
+            icon={<DollarSign />} 
+            label="Revenue" 
+            value={`$${revenue.toLocaleString()}`} 
+            detail="Protocol: Active" 
+          />
+          <StatCard 
+            icon={<Package />} 
+            label="Stock" 
+            value={`${totalStock} Units`} 
+            detail={`${products.length} Items`}
+            isAlert={totalStock < 0} 
+          />
+          <StatCard 
+            icon={<Activity />} 
+            label="Uptime" 
+            value="99.9%" 
+            detail="Node: Stable" 
+          />
         </div>
 
-        {/* INVENTORY TERMINAL */}
-        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2.5rem] overflow-hidden shadow-2xl">
-          <div className="p-8 border-b border-[var(--border-color)] flex items-center gap-4 bg-[var(--card-bg-secondary)]/50">
-            <Terminal className="text-brand w-5 h-5" />
-            <h2 className="font-mono text-xs uppercase tracking-[0.4em] font-bold">Active Manifest</h2>
+        {/* --- ASSET MANIFEST TABLE --- */}
+        <div className="bg-[#0d0d0d] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl">
+          <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+            <div className="flex items-center gap-4">
+              <Terminal className="text-brand w-4 h-4" />
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Asset Manifest</h2>
+            </div>
           </div>
-          <div className="p-0 overflow-x-auto">
+          
+          <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
               <thead>
-                <tr className="text-[var(--muted-text)] border-b border-[var(--border-color)]">
-                  <th className="p-6 uppercase tracking-widest">Identifier</th>
-                  <th className="p-6 uppercase tracking-widest">Category</th>
-                  <th className="p-6 uppercase tracking-widest">Price</th>
-                  <th className="p-6 uppercase tracking-widest text-right">Action</th>
+                <tr className="text-white/20 border-b border-white/5 uppercase tracking-widest text-[9px]">
+                  <th className="p-8">Asset</th>
+                  <th className="p-8">Stock</th>
+                  <th className="p-8">Price</th>
+                  <th className="p-8 text-right">Protocol</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-color)]">
-                <TableRow name="NEURAL LINK V1" category="TECH" price="$2,400" />
-                <TableRow name="OBSIDIAN CLOAK" category="APPAREL" price="$850" />
+              <tbody>
+                {products.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-20 text-center text-white/10 uppercase tracking-widest text-[10px]">
+                      No assets detected in current sector.
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((p) => (
+                    <tr key={p.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                      <td className="p-8 font-black uppercase group-hover:text-brand transition-colors">{p.name}</td>
+                      <td className={`p-8 font-bold ${p.stock <= 0 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                        {p.stock}
+                      </td>
+                      <td className="p-8 text-white/60">${Number(p.price).toFixed(2)}</td>
+                      <td className="p-8 text-right">
+                         <DeleteButton id={p.id} />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
-
-      {/* 3. RENDER MODAL ONLY WHEN OPEN */}
-      {isModalOpen && (
-        <NewDropModal onClose={() => setIsModalOpen(false)} />
-      )}
     </div>
   );
 }
 
-// Sub-components kept as they were (added alignment fixes)
-function StatCard({ icon, label, value }: { icon: any, label: string, value: string }) {
+function StatCard({ icon, label, value, detail, isAlert }: any) {
   return (
-    <div className="bg-[var(--card-bg)] border border-[var(--border-color)] p-8 rounded-[2rem] relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-100 transition-opacity">
+    <div className={`bg-[#0d0d0d] border ${isAlert ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.1)]' : 'border-white/10'} p-10 rounded-[2.5rem] relative group overflow-hidden transition-all duration-500 hover:border-white/20`}>
+      <div className={`absolute top-0 right-0 p-8 ${isAlert ? 'text-red-500/10' : 'text-brand/5'} group-hover:opacity-100 transition-colors scale-150`}>
         {icon}
       </div>
-      <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--muted-text)] mb-2 font-bold">{label}</p>
-      <p className="text-3xl font-black tracking-tighter">{value}</p>
+      <p className="text-[10px] uppercase tracking-[0.3em] text-white/30 mb-4 font-bold">{label}</p>
+      <p className={`text-4xl font-black tracking-tighter mb-2 ${isAlert ? 'text-red-500' : 'text-white'}`}>{value}</p>
+      <p className={`text-[9px] font-mono uppercase ${isAlert ? 'text-red-500/70' : 'text-brand/50'}`}>{detail}</p>
+      
+      {/* Decorative corner accent */}
+      <div className={`absolute bottom-0 right-0 w-8 h-8 opacity-20 ${isAlert ? 'bg-red-500' : 'bg-brand'} [clip-path:polygon(100%_0,100%_100%,0_100%)]`} />
     </div>
-  );
-}
-
-function TableRow({ name, category, price }: { name: string, category: string, price: string }) {
-  return (
-    <tr className="hover:bg-white/5 transition-colors group">
-      <td className="p-6 font-bold group-hover:text-brand transition-colors">{name}</td>
-      <td className="p-6 text-[var(--muted-text)]">{category}</td>
-      <td className="p-6">{price}</td>
-      <td className="p-6 text-right">
-        <button className="text-red-500/50 hover:text-red-500 uppercase text-[10px] tracking-widest font-bold transition-colors">Decommission</button>
-      </td>
-    </tr>
   );
 }
