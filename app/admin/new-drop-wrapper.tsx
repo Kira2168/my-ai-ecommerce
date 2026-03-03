@@ -1,8 +1,7 @@
 "use client";
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import NewDropModal from "./new-drop"; // Ensure this matches your file name exactly
+import NewDropModal from "./new-drop";
 
 export default function NewDropModalWrapper() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +16,9 @@ export default function NewDropModalWrapper() {
       </button>
 
       {isOpen && (
-        <NewDropModal onClose={() => setIsOpen(false)} />
+        <NewDropModal 
+          onClose={() => setIsOpen(false)}
+        />
       )}
     </>
   );

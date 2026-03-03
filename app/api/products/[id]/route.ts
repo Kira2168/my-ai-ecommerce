@@ -1,30 +1,31 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // In Next.js 15/16, params is a Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. Unwrap the ID from the URL
-    const { id } = await params;
+    // CRITICAL: You must await params in Next.js 15/16 API routes
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
-    // 2. Find the specific product
-    const product = await prisma.product.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    // 3. Handle 404
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    if (!id) {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    // 4. Return the data as JSON
+    const product = await db.product.findUnique({
+      where: { id: id },
+    });
+
+    if (!product) {
+      console.error(`DATABASE: Asset ${id} not found`);
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
     return NextResponse.json(product);
-  } catch (error: any) {
-    console.error("INDIVIDUAL_FETCH_ERROR:", error);
-    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  } catch (error) {
+    console.error("API_ERROR:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 // import { generateText } from "ai"; 
 // import { openai } from "@ai-sdk/openai"; 
@@ -17,14 +17,14 @@ export async function createProduct(formData: FormData) {
   // ---------------------------
 
   try {
-    await prisma.product.create({
+    await db.product.create({
       data: {
         name,
         description: rawDescription,
         price,
         category,
         aiTags,
-        images: ["/placeholder.png"],
+        image: "/placeholder.png",
       },
     });
 
@@ -38,7 +38,7 @@ export async function createProduct(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   try {
-    await prisma.product.delete({
+    await db.product.delete({
       where: { id },
     });
     revalidatePath("/admin"); 

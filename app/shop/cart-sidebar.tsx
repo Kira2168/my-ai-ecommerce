@@ -2,10 +2,13 @@
 import { useCart } from "@/lib/context/cart-context";
 import { X, ShoppingBag, ArrowRight, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function CartSidebar() {
   const { items, isOpen, setIsOpen, removeFromCart } = useCart();
+  const searchParams = useSearchParams();
   const totalPrice = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+  const orderId = searchParams.get("orderId");
 
   return (
     <>
@@ -65,11 +68,11 @@ export default function CartSidebar() {
               </div>
             </div>
             <Link 
-              href="/checkout" // Adjusted path based on your previous folder structure
+              href={orderId ? `/checkout?orderId=${orderId}` : "/checkout"}
               onClick={() => setIsOpen(false)}
-              className="group flex items-center justify-between w-full py-6 px-8 bg-brand text-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all"
+              className="group flex items-center justify-between w-full py-6 px-8 bg-brand text-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
             >
-              <span className="uppercase tracking-widest text-sm">Initiate Checkout</span>
+              <span className="uppercase tracking-widest text-sm italic">Initiate Protocol</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </Link>
           </footer>

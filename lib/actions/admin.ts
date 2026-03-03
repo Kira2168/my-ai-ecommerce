@@ -1,11 +1,11 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function deleteProduct(id: string) {
   try {
-    await prisma.product.delete({
+    await db.product.delete({
       where: { id },
     });
     

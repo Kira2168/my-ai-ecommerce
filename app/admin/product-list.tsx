@@ -1,10 +1,10 @@
 // admin/product-list.tsx
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { Package } from "lucide-react";
 import DeleteButton from "./delete-button";
 
 export default async function ProductList() {
-  const products = await prisma.product.findMany({
+  const products = await db.product.findMany({
     orderBy: { createdAt: 'desc' },
   });
 
@@ -26,7 +26,7 @@ export default async function ProductList() {
           {products.map((product) => (
   <div 
     key={product.id} 
-    className="group relative p-4 rounded-2xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.08] transition-all duration-300 flex justify-between items-center"
+    className="group relative p-4 rounded-2xl border border-white/5 bg-white/3 hover:bg-white/8 transition-all duration-300 flex justify-between items-center"
   >
     <div className="z-10">
       <p className="text-white font-bold tracking-tight group-hover:text-brand transition-colors">
