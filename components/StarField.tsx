@@ -10,14 +10,28 @@ export default function StarField() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const mediaReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let isLowPower = mediaReduced.matches || window.innerWidth < 640;
+    let animationId = 0;
     let particles: any[] = [];
     const mouse = { x: -1000, y: -1000, radius: 150 };
 
+    const getParticleCount = () => (isLowPower ? 40 : 120);
+
+    const setCanvasSize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, isLowPower ? 1 : 1.5);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
     const init = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      isLowPower = mediaReduced.matches || window.innerWidth < 640;
+      setCanvasSize();
       particles = [];
-      for (let i = 0; i < 120; i++) {
+      for (let i = 0; i < getParticleCount(); i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -34,6 +48,10 @@ export default function StarField() {
     };
 
     const animate = () => {
+      if (document.hidden) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       particles.forEach((p) => {
@@ -73,14 +91,14 @@ export default function StarField() {
 
         // 4. Draw
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 5;
+        ctx.shadowBlur = isLowPower ? 0 : 5;
         ctx.shadowColor = "#ff0000";
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0; // Reset blur for performance
       });
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -88,13 +106,22 @@ export default function StarField() {
       mouse.y = e.clientY;
     };
 
+    const handleVisibility = () => {
+      if (!document.hidden && !animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("resize", init);
+    document.addEventListener("visibilitychange", handleVisibility);
     init(); animate();
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", init);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (animationId) cancelAnimationFrame(animationId);
     };
   }, []);
 

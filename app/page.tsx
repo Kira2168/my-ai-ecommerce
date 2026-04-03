@@ -8,9 +8,14 @@ import { createOrderAction } from "@/lib/actions/create-order";
 export default function Home() {
   // 1. Pattern to fix Hydration Mismatch - Ensures client-side only features (video/stars) don't conflict with SSR
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   return (
@@ -25,19 +30,21 @@ export default function Home() {
           </div>
 
           {/* ANIME VIDEO BACKGROUND */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover grayscale-[50%]"
-            >
-              <source src="https://motionbgs.com/media/4636/cyberpunk-city-street.mp4" type="video/mp4" />
-            </video>
-            {/* Dark gradient overlay for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
-          </div>
+          {!isMobile && (
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover grayscale-[50%]"
+              >
+                <source src="https://motionbgs.com/media/4636/cyberpunk-city-street.mp4" type="video/mp4" />
+              </video>
+              {/* Dark gradient overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
+            </div>
+          )}
         </>
       )}
 
