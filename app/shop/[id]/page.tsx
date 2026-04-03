@@ -161,8 +161,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const currentStock = product.stock || 0;
+  const currentStock = Number.isFinite(product.stock) ? product.stock : 0;
   const isSoldOut = currentStock <= 0;
+  const isLowStock = currentStock > 0 && currentStock <= 5;
   const stockPercentage = Math.min((currentStock / 20) * 100, 100);
 
   return (
@@ -207,6 +208,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Unit Valuation</span>
               <span className={`text-4xl sm:text-5xl font-mono font-black tracking-tight ${isSoldOut ? "text-red-900/30" : "text-white"}`}>
                 ${Number(product.price).toFixed(2)}
+              </span>
+              <span className={`mt-2 text-[10px] font-mono font-bold uppercase tracking-widest ${isSoldOut ? "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.45)]" : isLowStock ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]" : "text-emerald-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.45)]"}`}>
+                {isSoldOut ? "Out of stock" : `${currentStock} remaining`}
               </span>
             </div>
 
