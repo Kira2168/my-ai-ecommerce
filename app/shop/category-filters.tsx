@@ -1,6 +1,6 @@
 "use client";
 
-const categories = ["All", "Apparel", "Accessories", "Tech", "Digital"];
+import { useEffect, useState } from "react";
 
 interface Props {
   activeCategory: string;
@@ -8,6 +8,23 @@ interface Props {
 }
 
 export default function CategoryFilters({ activeCategory, onCategoryChange }: Props) {
+  const [categories, setCategories] = useState<string[]>(["All"]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        const data = await res.json();
+        const names = Array.isArray(data) ? data.map((c) => c.name) : [];
+        setCategories(["All", ...names]);
+      } catch {
+        setCategories(["All", "Apparel", "Accessories", "Tech", "Digital"]);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
   return (
     <div className="flex items-center justify-center gap-3 mb-16 overflow-x-auto pb-4 no-scrollbar">
       {categories.map((cat) => (

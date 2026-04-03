@@ -14,6 +14,7 @@ export default function NewDropModal({
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
   
   // Initialize state. If initialData exists, we use it; otherwise, defaults.
   const [formData, setFormData] = useState({
@@ -39,6 +40,27 @@ export default function NewDropModal({
         description: initialData.description || ""
       });
     }
+  }, [initialData]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        const data = await res.json();
+        const names = Array.isArray(data) ? data.map((c) => c.name) : [];
+        setCategories(names);
+        if (!initialData && names.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            category: names.includes(prev.category) ? prev.category : names[0],
+          }));
+        }
+      } catch {
+        setCategories(["Apparel", "Accessories", "Tech", "Digital"]);
+      }
+    };
+
+    loadCategories();
   }, [initialData]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,10 +231,11 @@ export default function NewDropModal({
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   className="w-full bg-black border border-white/10 rounded-xl p-4 outline-none focus:border-brand transition-all text-sm text-white appearance-none cursor-pointer"
                 >
-                  <option>TECH</option>
-                  <option>APPAREL</option>
-                  <option>DIGITAL</option>
-                  <option>ACCESSORIES</option>
+                  {(categories.length > 0 ? categories : ["Apparel", "Accessories", "Tech", "Digital"]).map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

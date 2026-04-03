@@ -18,6 +18,12 @@ model Product {
   updatedAt   DateTime @updatedAt
 }
 
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
 model Order {
   id        String   @id @default(cuid())
   total     Float

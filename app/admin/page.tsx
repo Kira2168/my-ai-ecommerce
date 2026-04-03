@@ -14,6 +14,7 @@ import Link from "next/link";
 import NewDropModalWrapper from "./new-drop-wrapper"; 
 import EditDropModalWrapper from "@/app/admin/edit-drop-wrapper";
 import DeleteButton from "./delete-button"; 
+import CategoryManager from "./category-manager";
 
 const formatOrderTime = (date: Date) =>
   date.toLocaleTimeString("en-US", {
@@ -152,6 +153,20 @@ export default async function AdminDashboard() {
     .filter(o => o.status === "COMPLETED")
     .reduce((acc, o) => acc + Number(o.total || 0), 0);
 
+  const completedOrders = orders.filter(o => o.status === "COMPLETED");
+  const completionRate = orders.length > 0 ? (completedOrders.length / orders.length) * 100 : 0;
+  const avgOrderValue = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
+  const categoryCounts = products.reduce((acc, p) => {
+    const name = p.category || "Uncategorized";
+    acc.set(name, (acc.get(name) || 0) + 1);
+    return acc;
+  }, new Map<string, number>());
+
+  const topCategory = Array.from(categoryCounts.entries()).reduce(
+    (acc, [name, count]) => (count > acc.count ? { name, count } : acc),
+    { name: "Uncategorized", count: 0 }
+  );
+
   const liveCarts = orders.filter(
     o => o.status === "PENDING" && Array.isArray(o.items) && o.items.length > 0
   );
@@ -205,6 +220,28 @@ export default async function AdminDashboard() {
             value={liveCarts.length} 
             detail="Active Intent Detected" 
           />
+        </div>
+
+        {/* --- ANALYTICS PULSE --- */}
+        <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <Activity className="text-brand w-4 h-4" />
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Analytics Pulse</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Completion Rate</p>
+              <p className="text-2xl font-black text-white">{completionRate.toFixed(0)}%</p>
+            </div>
+            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Avg Order</p>
+              <p className="text-2xl font-black text-white">${avgOrderValue.toFixed(2)}</p>
+            </div>
+            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Top Category</p>
+              <p className="text-2xl font-black text-white uppercase">{topCategory.name}</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -272,50 +309,54 @@ export default async function AdminDashboard() {
             </div>
           </div>
 
-          {/* --- RIGHT: TRANSMISSION LOG --- */}
-          <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
-            <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-white/[0.01]">
-              <History className="text-brand w-4 h-4" />
-              <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Transmission Log</h2>
-            </div>
-            <div className="p-4 sm:p-5 space-y-4 max-h-[700px] overflow-y-auto custom-scrollbar">
-              {orders.length === 0 ? (
-                <div className="p-20 text-center text-white/10 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
-              ) : (
-                orders.map((order) => (
-                  <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-brand/40 transition-all group relative overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 relative z-10">
-                      <div>
-                        <p className="text-[8px] font-mono text-white/30 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
-                        <div className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
-                          order.status === "COMPLETED" ? "bg-brand text-black shadow-[0_0_15px_rgba(0,242,255,0.3)]" : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                        }`}>
-                          {order.status}
+          {/* --- RIGHT: CATEGORY + TRANSMISSION --- */}
+          <div className="flex flex-col gap-8">
+            <CategoryManager />
+
+            <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
+              <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-white/[0.01]">
+                <History className="text-brand w-4 h-4" />
+                <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Transmission Log</h2>
+              </div>
+              <div className="p-4 sm:p-5 space-y-4 max-h-[700px] overflow-y-auto custom-scrollbar">
+                {orders.length === 0 ? (
+                  <div className="p-20 text-center text-white/10 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
+                ) : (
+                  orders.map((order) => (
+                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-brand/40 transition-all group relative overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 relative z-10">
+                        <div>
+                          <p className="text-[8px] font-mono text-white/30 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
+                          <div className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
+                            order.status === "COMPLETED" ? "bg-brand text-black shadow-[0_0_15px_rgba(0,242,255,0.3)]" : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                          }`}>
+                            {order.status}
+                          </div>
                         </div>
+                        <p className="text-lg sm:text-xl font-mono font-black text-white">${Number(order.total).toFixed(2)}</p>
                       </div>
-                      <p className="text-lg sm:text-xl font-mono font-black text-white">${Number(order.total).toFixed(2)}</p>
-                    </div>
-                    
-                    <div className="space-y-2 mb-4 relative z-10">
-                      {(order.items as any[])?.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-[9px] sm:text-[10px] font-mono text-white/50 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                          <span className="uppercase truncate max-w-[120px]">{item.name}</span>
-                          <span className="text-brand">x{item.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
+                      
+                      <div className="space-y-2 mb-4 relative z-10">
+                        {(order.items as any[])?.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-[9px] sm:text-[10px] font-mono text-white/50 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                            <span className="uppercase truncate max-w-[120px]">{item.name}</span>
+                            <span className="text-brand">x{item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
 
-                    <div className="pt-3 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/20 relative z-10">
-                      <div className="flex items-center gap-2"><Activity size={10} className="text-brand/40" /> {formatOrderTime(new Date(order.createdAt))}</div>
-                      <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
-                    </div>
+                      <div className="pt-3 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/20 relative z-10">
+                          <div className="flex items-center gap-2"><Activity size={10} className="text-brand/40" /> {formatOrderTime(new Date(order.createdAt))}</div>
+                          <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
+                      </div>
 
-                    {order.status === "COMPLETED" && (
-                      <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-brand/5 blur-3xl rounded-full" />
-                    )}
-                  </div>
-                ))
-              )}
+                      {order.status === "COMPLETED" && (
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-brand/5 blur-3xl rounded-full" />
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
