@@ -93,9 +93,9 @@ export default async function AdminDashboard() {
           />
           <StatCard 
             icon={<ShoppingCart />} 
-            label="Live Carts" 
+            label="Pending Checkouts" 
             value={liveCarts.length} 
-            detail="Active Intent Detected" 
+            detail="Carts waiting for payment" 
           />
         </div>
 
