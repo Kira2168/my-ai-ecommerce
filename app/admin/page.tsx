@@ -13,6 +13,7 @@ import DeleteButton from "./delete-button";
 import CategoryManager from "./category-manager";
 import AdminHeader from "./admin-header";
 import { getOrdersSafe, getProductsSafe } from "./admin-data";
+import DeleteOrderButton from "./orders/delete-order-button";
 
 const formatOrderTime = (date: Date) =>
   date.toLocaleTimeString("en-US", {
@@ -224,7 +225,10 @@ export default async function AdminDashboard() {
 
                       <div className="pt-3 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/20 relative z-10">
                           <div className="flex items-center gap-2"><Activity size={10} className="text-brand/40" /> {formatOrderTime(new Date(order.createdAt))}</div>
-                          <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
+                            <DeleteOrderButton id={order.id} />
+                          </div>
                       </div>
 
                       {order.status === "COMPLETED" && (

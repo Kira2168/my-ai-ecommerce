@@ -3,6 +3,7 @@ import AdminHeader from "../admin-header";
 import { getOrdersSafe } from "../admin-data";
 import ClearTransactionsButton, { OrderStatusButton } from "./clear-transactions-button";
 import Link from "next/link";
+import DeleteOrderButton from "./delete-order-button";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +117,7 @@ export default async function AdminOrdersPage({
                     <div className="flex items-center gap-3">
                       <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
                       <OrderStatusButton id={order.id} status={order.status} />
+                      <DeleteOrderButton id={order.id} />
                     </div>
                   </div>
 

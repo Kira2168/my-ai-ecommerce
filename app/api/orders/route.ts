@@ -22,8 +22,16 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (id) {
+      await db.order.delete({ where: { id } });
+      return NextResponse.json({ success: true, mode: "single" });
+    }
+
     await db.order.deleteMany({});
     return NextResponse.json({ success: true });
   } catch (error: any) {
