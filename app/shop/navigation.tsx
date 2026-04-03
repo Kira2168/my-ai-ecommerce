@@ -19,28 +19,28 @@ export default function Navigation({ minimal = false }: { minimal?: boolean }) {
   if (!mounted) return <div className="h-[100px]" />; // Spacer while loading
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-6 pointer-events-none">
-     <div className="max-w-7xl mx-auto flex justify-between items-center 
-                backdrop-blur-md bg-[var(--nav-bg)] 
-                border border-[var(--border-color)] 
-                rounded-full px-8 py-4 shadow-xl 
-                pointer-events-auto transition-all duration-500">
+    <nav className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 py-4 sm:py-6 pointer-events-none">
+     <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3
+          backdrop-blur-md bg-[var(--nav-bg)] 
+          border border-[var(--border-color)] 
+          rounded-2xl sm:rounded-full px-4 sm:px-8 py-2.5 sm:py-4 shadow-xl 
+          pointer-events-auto transition-all duration-500">
         
         {/* LOGO */}
         <Link href="/" className="group flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-brand blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.5)]">
-              <span className="text-black font-black text-sm">FS</span>
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-brand flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.5)]">
+                <span className="text-black font-black text-[11px] sm:text-sm">FS</span>
             </div>
           </div>
-          <span className="text-[var(--foreground)] font-black tracking-tighter text-2xl uppercase">
+          <span className="text-[var(--foreground)] font-black tracking-tighter text-lg sm:text-2xl uppercase">
             FUTURE<span className="text-brand">SHOP</span>
           </span>
         </Link>
 
         {/* ACTIONS */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-3 sm:gap-4 items-center">
           <ThemeToggle />
           {!minimal && (
             <>

@@ -14,7 +14,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+    <main className="min-h-screen bg-black flex flex-col items-center justify-center p-5 sm:p-6 text-center relative overflow-hidden">
       
       {/* 2. INTERACTIVE BACKGROUNDS (Only loads on Client) */}
       {isMounted && (
@@ -48,7 +48,7 @@ export default function Home() {
       <div className="relative z-20 flex flex-col items-center">
         
         {/* ARCHITECT TAG */}
-        <div className="flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-white/5 bg-white/5 backdrop-blur-md">
+        <div className="flex items-center gap-2 mb-6 sm:mb-8 px-4 py-1.5 rounded-full border border-white/5 bg-white/5 backdrop-blur-md">
           <Cpu className="w-3 h-3 text-cyan-300" />
           <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">
             Architected by <span className="text-white font-bold">Kirubel</span>
@@ -56,11 +56,11 @@ export default function Home() {
         </div>
 
         {/* HERO TITLE */}
-        <h1 className="text-7xl md:text-[11rem] font-black tracking-[-0.05em] leading-none mb-4 uppercase italic bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(125,211,252,0.2)]">
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[11rem] font-black tracking-[-0.05em] leading-none mb-4 uppercase italic bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(125,211,252,0.2)]">
           LUCY<span className="text-cyan-200 not-italic">.</span>GEBEYA
         </h1>
         
-        <p className="text-gray-400 max-w-lg font-mono text-[10px] md:text-xs uppercase tracking-[0.5em] mb-12 leading-relaxed">
+        <p className="text-gray-400 max-w-lg font-mono text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.3em] sm:tracking-[0.5em] mb-10 sm:mb-12 leading-relaxed">
           The world&apos;s first e-commerce platform <br /> 
           <span className="text-white/40">powered by autonomous AI agents.</span>
         </p>
@@ -70,7 +70,7 @@ export default function Home() {
           <form action={createOrderAction}>
             <button 
               type="submit"
-              className="group relative px-14 py-6 transition-all duration-500 overflow-hidden outline-none"
+              className="group relative px-8 sm:px-14 py-4 sm:py-6 transition-all duration-500 overflow-hidden outline-none"
               style={{ clipPath: "polygon(0 15%, 15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%)" }}
             >
               {/* BUTTON BORDER */}
@@ -86,7 +86,7 @@ export default function Home() {
               <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-300 z-20 opacity-0 group-hover:opacity-100 group-hover:animate-scan transition-opacity" />
 
               {/* BUTTON CONTENT */}
-              <span className="relative z-30 flex items-center gap-3 text-cyan-400 group-hover:text-white font-black uppercase tracking-[0.4em] text-xs transition-colors duration-500">
+              <span className="relative z-30 flex items-center gap-3 text-cyan-400 group-hover:text-white font-black uppercase tracking-[0.25em] sm:tracking-[0.4em] text-[10px] sm:text-xs transition-colors duration-500">
                 Initiate Access <Terminal className="w-4 h-4 group-hover:rotate-12 transition-transform" />
               </span>
 
@@ -96,7 +96,7 @@ export default function Home() {
           </form>
 
           {/* HIDDEN ADMIN ENTRANCE */}
-          <div className="mt-16 opacity-0 hover:opacity-100 transition-opacity duration-700">
+          <div className="mt-10 sm:mt-16 opacity-0 hover:opacity-100 transition-opacity duration-700">
             <a 
               href="/admin/login" 
               className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.6em] text-white/20 hover:text-red-500 hover:drop-shadow-[0_0_10px_#ff0000] transition-all duration-300"

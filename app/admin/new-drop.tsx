@@ -91,10 +91,10 @@ export default function NewDropModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 backdrop-blur-xl bg-black/60 overflow-y-auto">
       <form 
         onSubmit={handleSubmit}
-        className="max-w-4xl w-full bg-[#0d0d0d] border border-white/10 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,242,255,0.1)] animate-in zoom-in-95 duration-300 my-auto flex flex-col md:flex-row"
+        className="max-w-4xl w-full bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,242,255,0.1)] animate-in zoom-in-95 duration-300 my-auto flex flex-col md:flex-row"
       >
         {/* LEFT SIDE: LIVE PREVIEW */}
-        <div className="w-full md:w-1/3 bg-black/40 border-r border-white/5 p-8 flex flex-col justify-center items-center text-center space-y-4">
+        <div className="w-full md:w-1/3 bg-black/40 border-b md:border-b-0 md:border-r border-white/5 p-5 sm:p-8 flex flex-col justify-center items-center text-center space-y-4">
             <div className="flex items-center gap-2 text-brand mb-2">
               <Eye className="w-3 h-3" />
               <span className="text-[8px] font-black uppercase tracking-[0.3em]">Live Feed Preview</span>
@@ -121,7 +121,7 @@ export default function NewDropModal({
 
         {/* RIGHT SIDE: DATA INPUT */}
         <div className="flex-1 flex flex-col">
-          <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+          <div className="p-5 sm:p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
             <div className="flex items-center gap-3">
               {isEditMode ? <RefreshCcw className="text-brand w-4 h-4" /> : <Database className="text-brand w-4 h-4" />}
               <h2 className="font-mono text-[10px] uppercase tracking-[0.4em] font-bold">
@@ -133,7 +133,7 @@ export default function NewDropModal({
             </button>
           </div>
 
-          <div className="p-8 md:p-10 space-y-6">
+          <div className="p-6 sm:p-8 md:p-10 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold ml-1">Asset Name</label>
@@ -184,7 +184,7 @@ export default function NewDropModal({
                 required
                 value={formData.image}
                 onChange={(e) => setFormData({...formData, image: e.target.value})}
-                className="w-full bg-black border border-white/10 rounded-xl p-4 outline-none focus:border-brand transition-all text-[10px] text-white/60 font-mono" 
+                className="w-full bg-black border border-white/10 rounded-xl p-4 outline-none focus:border-brand transition-all text-[9px] sm:text-[10px] text-white/60 font-mono" 
                 placeholder="Paste URL or use Memory Upload..." 
               />
             </div>
@@ -233,7 +233,7 @@ export default function NewDropModal({
             <button 
               disabled={loading}
               type="submit"
-              className={`w-full py-5 font-black rounded-xl transition-all uppercase tracking-[0.4em] shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 ${
+              className={`w-full py-4 sm:py-5 font-black rounded-xl transition-all uppercase tracking-[0.2em] sm:tracking-[0.4em] shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 ${
                 isEditMode ? 'bg-brand text-black hover:bg-cyan-400' : 'bg-white text-black hover:bg-brand'
               }`}
             >

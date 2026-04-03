@@ -79,15 +79,15 @@ const filteredProducts = products.filter(p => {
       )}
 
       {/* HERO */}
-      <section className="pt-52 pb-10 px-6 text-center relative overflow-hidden">
+      <section className="pt-32 sm:pt-40 lg:pt-52 pb-10 px-4 sm:px-6 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-150 bg-brand/10 blur-[140px] rounded-full -z-10 animate-pulse" />
-        <h1 className="text-8xl md:text-[12rem] font-black tracking-tighter leading-none mb-6">
+        <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[12rem] font-black tracking-tighter leading-none mb-6">
           <span className="block text-foreground uppercase">THE</span>
           <span className="block italic text-transparent bg-clip-text bg-gradient-to-b from-brand to-brand/20 uppercase">DROP.</span>
         </h1>
 
         {/* FUNCTIONAL SEARCH BAR */}
-        <div className="max-w-md mx-auto mt-12 relative group">
+        <div className="max-w-xs sm:max-w-md mx-auto mt-10 sm:mt-12 relative group">
           <div className="absolute -inset-1 bg-brand/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
           <div className="relative flex items-center bg-foreground/5 border border-foreground/10 rounded-2xl px-5 py-3 backdrop-blur-md">
             <Terminal className="w-4 h-4 text-brand/50 mr-3" />
@@ -96,19 +96,19 @@ const filteredProducts = products.filter(p => {
               placeholder="QUERY_ASSET_DATABASE..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none text-[10px] font-mono tracking-widest w-full text-foreground placeholder:text-foreground/20 uppercase"
+              className="bg-transparent border-none outline-none text-[9px] sm:text-[10px] font-mono tracking-widest w-full text-foreground placeholder:text-foreground/20 uppercase"
             />
             <Search className="w-4 h-4 text-foreground/20" />
           </div>
         </div>
       </section>
 
-      <section className="px-6 pb-12 mt-10">
+      <section className="px-4 sm:px-6 pb-12 mt-8 sm:mt-10">
         <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
       </section>
 
       {/* PRODUCT GRID */}
-      <main className="px-8 pb-40 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      <main className="px-4 sm:px-8 pb-32 sm:pb-40 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12">
         {filteredProducts.map((product) => {
           const isSoldOut = product.stock <= 0;
           return (
@@ -116,7 +116,7 @@ const filteredProducts = products.filter(p => {
               {/* RESTORED: Hover Glow */}
               <div className={`absolute -inset-[1.5px] rounded-[2.6rem] opacity-0 group-hover:opacity-100 blur-[3px] transition-all duration-500 bg-gradient-to-br ${isSoldOut ? "from-red-600/40 to-red-900/40" : "from-brand/40 to-purple-500/40"}`} />
 
-              <div className={`relative aspect-4/5 rounded-[2.5rem] bg-foreground/5 border border-foreground/10 overflow-hidden shadow-2xl transition-all duration-500 ${!isSoldOut ? "group-hover:-translate-y-2" : "opacity-80"}`}>
+              <div className={`relative aspect-4/5 rounded-[2rem] sm:rounded-[2.5rem] bg-foreground/5 border border-foreground/10 overflow-hidden shadow-2xl transition-all duration-500 ${!isSoldOut ? "group-hover:-translate-y-2" : "opacity-80"}`}>
                 <Link href={`/shop/${product.id}`} className="absolute inset-0 z-10" />
                 
                 {/* RESTORED: Image Zoom Effect */}
@@ -129,13 +129,13 @@ const filteredProducts = products.filter(p => {
                 </div>
 
                 {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-20 bg-gradient-to-t from-background via-background/80 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 z-20 bg-gradient-to-t from-background via-background/80 to-transparent">
                   <p className={`font-mono text-[9px] uppercase tracking-[0.4em] font-bold mb-2 ${isSoldOut ? 'text-red-500' : 'text-brand'}`}>
                     {isSoldOut ? "ARCHIVE" : product.category}
                   </p>
-                  <h2 className="text-2xl font-bold mb-5 uppercase text-foreground group-hover:text-brand transition-colors">{product.name}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 uppercase text-foreground group-hover:text-brand transition-colors">{product.name}</h2>
                   <div className="flex justify-between items-center relative z-40">
-                    <span className="text-2xl font-black font-mono text-foreground">${Number(product.price).toFixed(2)}</span>
+                    <span className="text-xl sm:text-2xl font-black font-mono text-foreground">${Number(product.price).toFixed(2)}</span>
                     {!isSoldOut && <QuickAddButton product={product} orderId={orderId} />}
                   </div>
                 </div>

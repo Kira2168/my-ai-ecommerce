@@ -112,11 +112,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const TopNav = () => (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center backdrop-blur-md bg-black/40 border border-white/10 rounded-full px-8 py-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+    <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4">
+      <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3 backdrop-blur-md bg-black/40 border border-white/10 rounded-2xl sm:rounded-full px-4 sm:px-8 py-2.5 sm:py-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
         <Link href="/shop" className="group flex items-center gap-2">
           <ArrowLeft className="w-4 h-4 text-gray-500 group-hover:text-brand transition-colors" />
-          <span className="text-white font-black tracking-tighter text-sm uppercase">
+          <span className="text-white font-black tracking-tighter text-[11px] sm:text-sm uppercase">
             BACK TO <span className="text-brand">COLLECTION</span>
           </span>
         </Link>
@@ -166,24 +166,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const stockPercentage = Math.min((currentStock / 20) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 lg:p-12 transition-colors duration-700 overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-12 transition-colors duration-700 overflow-x-hidden">
       <TopNav />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 pt-32">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 lg:gap-20 pt-24 sm:pt-28 lg:pt-32">
         <div className="relative group">
           <div className={`absolute -inset-10 ${isSoldOut ? 'bg-red-600/10' : 'bg-brand/5'} blur-[120px] rounded-full opacity-50 pointer-events-none`} />
-          <div className={`aspect-square rounded-[3.5rem] bg-white/5 border ${isSoldOut ? 'border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)]' : 'border-white/10'} overflow-hidden relative backdrop-blur-3xl shadow-2xl`}>
+          <div className={`aspect-square rounded-[2.5rem] sm:rounded-[3.5rem] bg-white/5 border ${isSoldOut ? 'border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)]' : 'border-white/10'} overflow-hidden relative backdrop-blur-3xl shadow-2xl`}>
             {product.image ? (
               <img src={product.image} alt={product.name} className={`w-full h-full object-cover transition-all duration-700 ${isSoldOut ? 'grayscale opacity-20 scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'}`} />
             ) : (
-              <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/5 font-black text-[15rem] uppercase">
+              <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/5 font-black text-[10rem] sm:text-[15rem] uppercase">
                 {product.name?.[0]}
               </div>
             )}
             
             {isSoldOut && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="px-8 py-3 border-[6px] border-red-600 text-red-600 font-black uppercase tracking-[0.4em] -rotate-12 text-4xl bg-black/40 backdrop-blur-sm">
+                <div className="px-5 sm:px-8 py-2 sm:py-3 border-[4px] sm:border-[6px] border-red-600 text-red-600 font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] -rotate-12 text-2xl sm:text-4xl bg-black/40 backdrop-blur-sm">
                   Asset Depleted
                 </div>
               </div>
@@ -198,19 +198,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </p>
           </div>
           
-          <h1 className={`text-6xl lg:text-8xl font-black italic uppercase tracking-tighter leading-none mb-8 ${isSoldOut ? 'text-white/10' : 'text-white'}`}>
+          <h1 className={`text-4xl sm:text-6xl lg:text-8xl font-black italic uppercase tracking-tighter leading-none mb-8 ${isSoldOut ? 'text-white/10' : 'text-white'}`}>
             {product.name}
           </h1>
           
-          <div className="flex items-end gap-10 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6 sm:gap-10 mb-2">
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Unit Valuation</span>
-              <span className={`text-5xl font-mono font-black tracking-tight ${isSoldOut ? "text-red-900/30" : "text-white"}`}>
+              <span className={`text-4xl sm:text-5xl font-mono font-black tracking-tight ${isSoldOut ? "text-red-900/30" : "text-white"}`}>
                 ${Number(product.price).toFixed(2)}
               </span>
             </div>
 
-            <div className="flex-1 max-w-50 mb-2">
+            <div className="flex-1 sm:max-w-[200px] mb-2">
               <div className={`flex justify-between text-[9px] font-black uppercase tracking-widest mb-2 ${isSoldOut ? "text-red-500" : "text-brand"}`}>
                 <span>Vault Density</span>
                 <span>{isSoldOut ? "0%" : `${currentStock} Units`}</span>
@@ -221,14 +221,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          <p className={`text-gray-400 text-lg leading-relaxed mb-12 italic border-l-2 pl-6 mt-8 ${isSoldOut ? 'opacity-20 border-red-900' : 'opacity-80 border-brand/20'}`}>
+          <p className={`text-gray-400 text-base sm:text-lg leading-relaxed mb-10 sm:mb-12 italic border-l-2 pl-4 sm:pl-6 mt-8 ${isSoldOut ? 'opacity-20 border-red-900' : 'opacity-80 border-brand/20'}`}>
             "{product.description || "Specifications for this asset are classified."}"
           </p>
 
           <button 
             onClick={handlePurchase} 
             disabled={isSoldOut || isSyncing} 
-            className={`w-full py-6 font-black rounded-2xl transition-all duration-500 uppercase tracking-[0.2em] group flex items-center justify-center gap-3 relative overflow-hidden ${!isSoldOut ? "bg-white text-black hover:bg-brand hover:scale-[1.02] shadow-xl" : "bg-red-950/20 text-red-600 cursor-not-allowed border-2 border-red-600/50"}`}
+            className={`w-full py-5 sm:py-6 font-black rounded-2xl transition-all duration-500 uppercase tracking-[0.15em] sm:tracking-[0.2em] group flex items-center justify-center gap-3 relative overflow-hidden ${!isSoldOut ? "bg-white text-black hover:bg-brand hover:scale-[1.02] shadow-xl" : "bg-red-950/20 text-red-600 cursor-not-allowed border-2 border-red-600/50"}`}
           >
             {isSyncing ? <Loader2 className="w-5 h-5 animate-spin" /> : isAdded ? <><Check className="w-5 h-5" /> ASSET SECURED</> : isSoldOut ? "Asset Depleted" : <>{'Initiate Purchase'} <Zap className="w-5 h-5 fill-current transition-transform group-hover:rotate-12" /></>}
           </button>
