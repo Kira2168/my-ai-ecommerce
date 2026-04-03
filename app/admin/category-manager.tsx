@@ -56,8 +56,8 @@ export default function CategoryManager() {
   };
 
   return (
-    <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
-      <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-white/[0.01]">
+    <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
+      <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
         <Tag className="text-brand w-4 h-4" />
         <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Category Control</h2>
       </div>
@@ -68,7 +68,7 @@ export default function CategoryManager() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="NEW CATEGORY"
-            className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-white/80 placeholder:text-white/20 outline-none focus:border-brand transition-all"
+                className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-brand transition-all"
           />
           <button
             type="button"
@@ -89,9 +89,9 @@ export default function CategoryManager() {
             categories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5"
+                className="flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg-secondary)] border border-white/5"
               >
-                <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/70">
+                <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-foreground/70">
                   {category.name}
                 </span>
                 <button

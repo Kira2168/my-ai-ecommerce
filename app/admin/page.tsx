@@ -1,20 +1,18 @@
-import { db } from "@/lib/db";
 import { 
   Package, 
   DollarSign, 
   Activity, 
   Terminal, 
   ShieldCheck, 
-  ArrowLeft,
   ShoppingCart,
-  History,
-  Edit2
+  History
 } from "lucide-react";
-import Link from "next/link";
 import NewDropModalWrapper from "./new-drop-wrapper"; 
 import EditDropModalWrapper from "@/app/admin/edit-drop-wrapper";
 import DeleteButton from "./delete-button"; 
 import CategoryManager from "./category-manager";
+import AdminHeader from "./admin-header";
+import { getOrdersSafe, getProductsSafe } from "./admin-data";
 
 const formatOrderTime = (date: Date) =>
   date.toLocaleTimeString("en-US", {
@@ -32,117 +30,6 @@ const formatOrderDate = (date: Date) =>
 
 export const dynamic = "force-dynamic";
 
-type AdminProduct = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image: string | null;
-  category: string;
-  description: string;
-  createdAt: Date;
-};
-
-type AdminOrder = {
-  id: string;
-  total: number;
-  status: string;
-  items: any[];
-  createdAt: Date;
-};
-
-async function getProductsSafe(): Promise<AdminProduct[]> {
-  try {
-    const rows = await db.product.findMany({ orderBy: { createdAt: "desc" } });
-    return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      price: Number(row.price ?? 0),
-      stock: Number((row as any).stock ?? 0),
-      image: ((row as any).image ?? null) as string | null,
-      category: String((row as any).category ?? "TECH"),
-      description: String((row as any).description ?? ""),
-      createdAt: (row as any).createdAt ? new Date((row as any).createdAt) : new Date(0),
-    }));
-  } catch (error) {
-    console.error("ADMIN_PRODUCT_FETCH_FAILED:", error);
-
-    const cols = await db.$queryRaw<{ column_name: string }[]>`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_schema = 'public' AND table_name = 'Product'
-    `;
-
-    const set = new Set(cols.map((c) => c.column_name));
-    const selectParts = [
-      set.has("id") ? `"id"` : `''::text AS "id"`,
-      set.has("name") ? `"name"` : `''::text AS "name"`,
-      set.has("price") ? `"price"` : `0::double precision AS "price"`,
-      set.has("stock") ? `"stock"` : `0::integer AS "stock"`,
-      set.has("image") ? `"image"` : `NULL::text AS "image"`,
-      set.has("category") ? `"category"` : `'TECH'::text AS "category"`,
-      set.has("description") ? `"description"` : `''::text AS "description"`,
-      set.has("createdAt") ? `"createdAt"` : `NOW() AS "createdAt"`,
-    ];
-
-    const orderBy = set.has("createdAt") ? ` ORDER BY "createdAt" DESC` : "";
-    const query = `SELECT ${selectParts.join(", ")} FROM "Product"${orderBy}`;
-    const rows = await db.$queryRawUnsafe<any[]>(query);
-
-    return rows.map((row) => ({
-      id: String(row.id ?? ""),
-      name: String(row.name ?? "UNKNOWN"),
-      price: Number(row.price ?? 0),
-      stock: Number(row.stock ?? 0),
-      image: (row.image ?? null) as string | null,
-      category: String(row.category ?? "TECH"),
-      description: String(row.description ?? ""),
-      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(0),
-    }));
-  }
-}
-
-async function getOrdersSafe(): Promise<AdminOrder[]> {
-  try {
-    const rows = await db.order.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
-    return rows.map((row) => ({
-      id: row.id,
-      total: Number(row.total ?? 0),
-      status: row.status ?? "PENDING",
-      items: Array.isArray(row.items) ? (row.items as any[]) : [],
-      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(0),
-    }));
-  } catch (error) {
-    console.error("ADMIN_ORDER_FETCH_FAILED:", error);
-
-    const cols = await db.$queryRaw<{ column_name: string }[]>`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_schema = 'public' AND table_name = 'Order'
-    `;
-
-    const set = new Set(cols.map((c) => c.column_name));
-    const selectParts = [
-      set.has("id") ? `"id"` : `''::text AS "id"`,
-      set.has("total") ? `"total"` : `0::double precision AS "total"`,
-      set.has("status") ? `"status"` : `'PENDING'::text AS "status"`,
-      set.has("items") ? `"items"` : `'[]'::jsonb AS "items"`,
-      set.has("createdAt") ? `"createdAt"` : `NOW() AS "createdAt"`,
-    ];
-
-    const orderBy = set.has("createdAt") ? ` ORDER BY "createdAt" DESC` : "";
-    const query = `SELECT ${selectParts.join(", ")} FROM "Order"${orderBy} LIMIT 30`;
-    const rows = await db.$queryRawUnsafe<any[]>(query);
-
-    return rows.map((row) => ({
-      id: String(row.id ?? ""),
-      total: Number(row.total ?? 0),
-      status: String(row.status ?? "PENDING"),
-      items: Array.isArray(row.items) ? row.items : [],
-      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(0),
-    }));
-  }
-}
 
 export default async function AdminDashboard() {
   const [products, orders] = await Promise.all([getProductsSafe(), getOrdersSafe()]);
@@ -172,20 +59,10 @@ export default async function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#05040a] text-white p-4 sm:p-6 lg:p-8 pt-16 sm:pt-20 font-sans">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 pt-16 sm:pt-20 font-sans">
       <div className="max-w-7xl mx-auto">
         
-        {/* --- NAVIGATION --- */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 sm:mb-12">
-            <Link href="/" className="group flex items-center gap-2 text-gray-500 hover:text-white transition-all duration-300">
-                <div className="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-brand/30 group-hover:bg-brand/5">
-                  <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                </div>
-                <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.3em]">Exit Terminal</span>
-            </Link>
-            <div className="hidden sm:block h-px flex-1 mx-8 bg-gradient-to-r from-white/10 to-transparent" />
-            <div className="text-[8px] sm:text-[9px] font-mono text-white/20 uppercase tracking-widest">Secure Node: 01-Kirubel</div>
-        </div>
+        <AdminHeader />
 
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 sm:mb-16">
@@ -194,7 +71,7 @@ export default async function AdminDashboard() {
               <ShieldCheck className="w-4 h-4 text-brand" />
               <span className="text-brand font-mono text-[9px] uppercase tracking-[0.4em] font-bold">Terminal Authenticated</span>
             </div>
-            <h1 className="text-4xl sm:text-6xl font-black italic tracking-tighter uppercase">Command Center</h1>
+            <h1 className="text-4xl sm:text-6xl font-black italic tracking-tighter uppercase text-foreground">Command Center</h1>
           </div>
           <NewDropModalWrapper />
         </div>
@@ -223,31 +100,31 @@ export default async function AdminDashboard() {
         </div>
 
         {/* --- ANALYTICS PULSE --- */}
-        <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
+        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
           <div className="flex items-center gap-3 mb-6">
             <Activity className="text-brand w-4 h-4" />
             <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Analytics Pulse</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
-              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Completion Rate</p>
-              <p className="text-2xl font-black text-white">{completionRate.toFixed(0)}%</p>
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Completion Rate</p>
+              <p className="text-2xl font-black text-foreground">{completionRate.toFixed(0)}%</p>
             </div>
             <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
-              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Avg Order</p>
-              <p className="text-2xl font-black text-white">${avgOrderValue.toFixed(2)}</p>
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Avg Order</p>
+              <p className="text-2xl font-black text-foreground">${avgOrderValue.toFixed(2)}</p>
             </div>
             <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
-              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Top Category</p>
-              <p className="text-2xl font-black text-white uppercase">{topCategory.name}</p>
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Top Category</p>
+              <p className="text-2xl font-black text-foreground uppercase">{topCategory.name}</p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* --- LEFT: ASSET MANIFEST --- */}
-          <div className="xl:col-span-2 bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
-            <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-white/[0.01]">
+          <div className="xl:col-span-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
+            <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
               <Terminal className="text-brand w-4 h-4" />
               <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Asset Manifest</h2>
             </div>
@@ -313,8 +190,8 @@ export default async function AdminDashboard() {
           <div className="flex flex-col gap-8">
             <CategoryManager />
 
-            <div className="bg-[#0d0d0d] border border-white/10 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
-              <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-white/[0.01]">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
+              <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
                 <History className="text-brand w-4 h-4" />
                 <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Transmission Log</h2>
               </div>
@@ -323,7 +200,7 @@ export default async function AdminDashboard() {
                   <div className="p-20 text-center text-white/10 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
                 ) : (
                   orders.map((order) => (
-                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-brand/40 transition-all group relative overflow-hidden">
+                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-[var(--card-bg-secondary)] border border-white/5 hover:border-brand/40 transition-all group relative overflow-hidden">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 relative z-10">
                         <div>
                           <p className="text-[8px] font-mono text-white/30 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
