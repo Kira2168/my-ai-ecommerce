@@ -104,18 +104,18 @@ export default async function AdminDashboard() {
         <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
           <div className="flex items-center gap-3 mb-6">
             <Activity className="text-brand w-4 h-4" />
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Analytics Pulse</h2>
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Analytics Pulse</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+            <div className="p-4 rounded-2xl border border-(--border-color) bg-(--card-bg-secondary)">
               <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Completion Rate</p>
               <p className="text-2xl font-black text-foreground">{completionRate.toFixed(0)}%</p>
             </div>
-            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+            <div className="p-4 rounded-2xl border border-(--border-color) bg-(--card-bg-secondary)">
               <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Avg Order</p>
               <p className="text-2xl font-black text-foreground">${avgOrderValue.toFixed(2)}</p>
             </div>
-            <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+            <div className="p-4 rounded-2xl border border-(--border-color) bg-(--card-bg-secondary)">
               <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Top Category</p>
               <p className="text-2xl font-black text-foreground uppercase">{topCategory.name}</p>
             </div>
@@ -127,26 +127,26 @@ export default async function AdminDashboard() {
           <div className="xl:col-span-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
             <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
               <Terminal className="text-brand w-4 h-4" />
-              <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Asset Manifest</h2>
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Asset Manifest</h2>
             </div>
             <div className="md:overflow-x-auto">
               <table className="w-full text-left font-mono text-xs hidden md:table">
                 <thead>
-                  <tr className="text-white/20 border-b border-white/5 uppercase tracking-widest text-[9px]">
+                  <tr className="text-foreground/45 border-b border-(--border-color) uppercase tracking-widest text-[9px]">
                     <th className="p-8">Asset</th>
                     <th className="p-8">Stock</th>
                     <th className="p-8">Unit Price</th>
                     <th className="p-8 text-right">Protocol</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-(--border-color)">
                   {products.map((p) => (
-                    <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <tr key={p.id} className="hover:bg-brand/5 transition-colors group">
                       <td className="p-8 font-black uppercase group-hover:text-brand transition-colors text-sm">{p.name}</td>
-                      <td className={`p-8 font-bold ${p.stock <= 0 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                      <td className={`p-8 font-bold ${p.stock <= 0 ? 'text-red-500 animate-pulse' : 'text-foreground'}`}>
                         {p.stock}
                       </td>
-                      <td className="p-8 text-white/60">${Number(p.price).toFixed(2)}</td>
+                      <td className="p-8 text-foreground/65">${Number(p.price).toFixed(2)}</td>
                       <td className="p-8">
                          <div className="flex justify-end items-center gap-3">
                             {/* EDIT TRIGGER */}
@@ -160,22 +160,22 @@ export default async function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
-              <div className="md:hidden divide-y divide-white/5">
+              <div className="md:hidden divide-y divide-(--border-color)">
                 {products.map((p) => (
                   <div key={p.id} className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-black uppercase text-white">{p.name}</p>
-                        <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest mt-1">
+                        <p className="text-sm font-black uppercase text-foreground">{p.name}</p>
+                        <p className="text-[9px] font-mono text-foreground/45 uppercase tracking-widest mt-1">
                           {p.category}
                         </p>
                       </div>
-                      <span className={`text-xs font-bold ${p.stock <= 0 ? 'text-red-500' : 'text-white'}`}>
+                      <span className={`text-xs font-bold ${p.stock <= 0 ? 'text-red-500' : 'text-foreground'}`}>
                         {p.stock}
                       </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-white/60">${Number(p.price).toFixed(2)}</span>
+                      <span className="text-foreground/65">${Number(p.price).toFixed(2)}</span>
                       <div className="flex items-center gap-2">
                         <EditDropModalWrapper product={p} />
                         <DeleteButton id={p.id} />
@@ -194,36 +194,36 @@ export default async function AdminDashboard() {
             <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
               <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
                 <History className="text-brand w-4 h-4" />
-                <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Transmission Log</h2>
+                <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Transmission Log</h2>
               </div>
               <div className="p-4 sm:p-5 space-y-4 max-h-[700px] overflow-y-auto custom-scrollbar">
                 {orders.length === 0 ? (
-                  <div className="p-20 text-center text-white/10 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
+                  <div className="p-20 text-center text-foreground/30 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
                 ) : (
                   orders.map((order) => (
-                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-[var(--card-bg-secondary)] border border-white/5 hover:border-brand/40 transition-all group relative overflow-hidden">
+                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-[var(--card-bg-secondary)] border border-(--border-color) hover:border-brand/40 transition-all group relative overflow-hidden">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 relative z-10">
                         <div>
-                          <p className="text-[8px] font-mono text-white/30 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
+                          <p className="text-[8px] font-mono text-foreground/45 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
                           <div className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
                             order.status === "COMPLETED" ? "bg-brand text-black shadow-[0_0_15px_rgba(0,242,255,0.3)]" : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                           }`}>
                             {order.status}
                           </div>
                         </div>
-                        <p className="text-lg sm:text-xl font-mono font-black text-white">${Number(order.total).toFixed(2)}</p>
+                        <p className="text-lg sm:text-xl font-mono font-black text-foreground">${Number(order.total).toFixed(2)}</p>
                       </div>
                       
                       <div className="space-y-2 mb-4 relative z-10">
                         {(order.items as any[])?.map((item, idx) => (
-                          <div key={idx} className="flex justify-between text-[9px] sm:text-[10px] font-mono text-white/50 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                          <div key={idx} className="flex justify-between text-[9px] sm:text-[10px] font-mono text-foreground/65 bg-(--card-bg) px-3 py-1.5 rounded-lg border border-(--border-color)">
                             <span className="uppercase truncate max-w-[120px]">{item.name}</span>
                             <span className="text-brand">x{item.quantity}</span>
                           </div>
                         ))}
                       </div>
 
-                      <div className="pt-3 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/20 relative z-10">
+                      <div className="pt-3 border-t border-(--border-color) flex justify-between items-center text-[9px] font-mono text-foreground/45 relative z-10">
                           <div className="flex items-center gap-2"><Activity size={10} className="text-brand/40" /> {formatOrderTime(new Date(order.createdAt))}</div>
                           <div className="flex items-center gap-3">
                             <span className="uppercase">{formatOrderDate(new Date(order.createdAt))}</span>
@@ -248,12 +248,12 @@ export default async function AdminDashboard() {
 
 function StatCard({ icon, label, value, detail, isAlert }: any) {
   return (
-    <div className={`bg-[#0d0d0d] border ${isAlert ? 'border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.1)]' : 'border-white/10'} p-6 sm:p-10 rounded-[2.5rem] relative group overflow-hidden transition-all duration-500 hover:border-white/30`}>
+    <div className={`bg-(--card-bg) border ${isAlert ? 'border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.1)]' : 'border-(--border-color)'} p-6 sm:p-10 rounded-[2.5rem] relative group overflow-hidden transition-all duration-500 hover:border-brand/40`}>
       <div className={`absolute top-0 right-0 p-6 sm:p-8 ${isAlert ? 'text-red-500/10' : 'text-brand/5'} group-hover:scale-125 transition-transform duration-700`}>
         {icon}
       </div>
-      <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-white/30 mb-4 font-bold">{label}</p>
-      <p className={`text-3xl sm:text-5xl font-black tracking-tighter mb-2 ${isAlert ? 'text-red-500' : 'text-white'}`}>{value}</p>
+      <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-foreground/45 mb-4 font-bold">{label}</p>
+      <p className={`text-3xl sm:text-5xl font-black tracking-tighter mb-2 ${isAlert ? 'text-red-500' : 'text-foreground'}`}>{value}</p>
       <p className={`text-[9px] sm:text-[10px] font-mono uppercase tracking-widest ${isAlert ? 'text-red-500/70' : 'text-brand/50'}`}>{detail}</p>
       <div className={`absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 opacity-20 ${isAlert ? 'bg-red-500' : 'bg-brand'} [clip-path:polygon(100%_0,100%_100%,0_100%)]`} />
     </div>

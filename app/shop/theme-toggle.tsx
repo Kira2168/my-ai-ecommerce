@@ -23,12 +23,18 @@ export default function ThemeToggle() {
       className="relative w-14 h-7 flex items-center rounded-full p-1 transition-all duration-500 border group overflow-hidden"
     >
       {/* Background Track */}
-      <div className={`absolute inset-0 transition-all duration-500 ${isDark ? "bg-gradient-to-r from-black to-purple-900 border border-purple-400/30" : "bg-[#fff8e7] border border-purple-300/40"}`} />
+      <div
+        className={`absolute inset-0 transition-all duration-500 ${
+          isDark
+            ? "bg-linear-to-r from-black to-purple-900 border border-purple-400/30"
+            : "bg-linear-to-r from-[#dff6ff] to-[#cde9ff] border border-sky-500/30"
+        }`}
+      />
       
       {/* Moving Thumb (The White Part) */}
       <div
         className={`relative z-10 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg ${
-          isDark ? "bg-white" : "bg-[#2a1746]"
+          isDark ? "bg-white" : "bg-[#0b3a67]"
         } ${
           isDark ? "translate-x-7" : "translate-x-0"
         }`}
@@ -36,7 +42,7 @@ export default function ThemeToggle() {
         {isDark ? (
           <Moon className="w-3 h-3 text-black" />
         ) : (
-          <Sun className="w-3 h-3 text-[#fff8e7]" />
+          <Sun className="w-3 h-3 text-[#dff6ff]" />
         )}
       </div>
     </button>

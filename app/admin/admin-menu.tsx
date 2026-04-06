@@ -25,18 +25,18 @@ export default function AdminMenu() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="p-2 rounded-lg bg-white/5 border border-white/10 hover:border-brand/40 hover:bg-brand/10 transition-all text-white/70 hover:text-brand"
+        className="p-2 rounded-lg bg-(--card-bg-secondary) border border-(--border-color) hover:border-brand/40 hover:bg-brand/10 transition-all text-foreground/75 hover:text-brand"
         aria-label="Toggle admin menu"
       >
         {open ? <X size={16} /> : <Menu size={16} />}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-48 rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl overflow-hidden z-50">
-          <div className="px-4 py-3 text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">
+        <div className="absolute right-0 mt-3 w-52 rounded-2xl border border-(--border-color) bg-(--card-bg) shadow-2xl overflow-hidden z-50 backdrop-blur-xl">
+          <div className="px-4 py-3 text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/45">
             Command Menu
           </div>
-          <div className="border-t border-white/5">
+          <div className="border-t border-(--border-color)">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -44,7 +44,7 @@ export default function AdminMenu() {
                   key={item.id}
                   type="button"
                   onClick={() => handleNavigate(item.href)}
-                  className="w-full text-left flex items-center gap-3 px-4 py-3 text-[10px] font-mono uppercase tracking-[0.3em] text-white/70 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  className="w-full text-left flex items-center gap-3 px-4 py-3 text-[10px] font-mono uppercase tracking-[0.3em] text-foreground/80 hover:text-foreground hover:bg-brand/8 transition-colors"
                 >
                   <Icon size={12} className="text-brand" />
                   {item.label}
