@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Save, Loader2 } from "lucide-react";
+import { Camera, Save, Loader2, Trash2 } from "lucide-react";
 
 type Profile = {
   displayName: string;
@@ -22,6 +22,7 @@ export default function ProfileEditor({ initialProfile, initialStats }: { initia
   const [profile, setProfile] = useState(initialProfile);
   const [stats, setStats] = useState(initialStats);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -70,6 +71,19 @@ export default function ProfileEditor({ initialProfile, initialStats }: { initia
     reader.readAsDataURL(file);
   };
 
+  const deleteProfile = async () => {
+    const confirmed = window.confirm("Delete your admin profile? This will reset it to defaults.");
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await fetch("/api/admin-profile", { method: "DELETE" });
+      await refreshProfile();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const lastLogin = profile.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString() : "No login data";
   const rotatedAt = profile.apiKeyRotatedAt ? new Date(profile.apiKeyRotatedAt).toLocaleDateString() : "Not recorded";
 
@@ -114,14 +128,24 @@ export default function ProfileEditor({ initialProfile, initialStats }: { initia
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => saveProfile({ displayName: profile.displayName })}
-              disabled={saving}
-              className="px-3 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-60 flex items-center gap-2"
-            >
-              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={deleteProfile}
+                disabled={deleting || saving}
+                className="px-3 py-2 rounded-xl border border-red-500/40 text-red-300 text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-60 flex items-center gap-2"
+              >
+                {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />} Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => saveProfile({ displayName: profile.displayName })}
+                disabled={saving || deleting}
+                className="px-3 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-60 flex items-center gap-2"
+              >
+                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
