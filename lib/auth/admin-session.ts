@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
 const cookieName = "admin_session";
+const preauthCookieName = "admin_preauth";
 const secret = new TextEncoder().encode(
   process.env.ADMIN_SESSION_SECRET || "dev-only-admin-session-secret-change-this"
 );
@@ -9,13 +10,36 @@ export function getAdminSessionCookieName() {
   return cookieName;
 }
 
+export function getAdminPreauthCookieName() {
+  return preauthCookieName;
+}
+
+export async function createAdminPreauthToken(payload: { adminId: string; email: string }) {
+  return await new SignJWT({ role: "ADMIN", email: payload.email, mfaPending: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(payload.adminId)
+    .setIssuedAt()
+    .setExpirationTime("10m")
+    .sign(secret);
+}
+
 export async function createAdminSessionToken(payload: { adminId: string; email: string }) {
-  return await new SignJWT({ role: "ADMIN", email: payload.email })
+  return await new SignJWT({ role: "ADMIN", email: payload.email, mfa: true })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.adminId)
     .setIssuedAt()
     .setExpirationTime("12h")
     .sign(secret);
+}
+
+export async function verifyAdminPreauthToken(token: string) {
+  const verified = await jwtVerify(token, secret, { algorithms: ["HS256"] });
+  return {
+    adminId: verified.payload.sub,
+    email: String(verified.payload.email || ""),
+    role: String(verified.payload.role || ""),
+    mfaPending: Boolean(verified.payload.mfaPending),
+  };
 }
 
 export async function verifyAdminSessionToken(token: string) {
@@ -24,5 +48,6 @@ export async function verifyAdminSessionToken(token: string) {
     adminId: verified.payload.sub,
     email: String(verified.payload.email || ""),
     role: String(verified.payload.role || ""),
+    mfa: Boolean(verified.payload.mfa),
   };
 }

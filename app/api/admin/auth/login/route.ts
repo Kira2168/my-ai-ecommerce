@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/auth/admin-password";
-import { createAdminSessionToken, getAdminSessionCookieName } from "@/lib/auth/admin-session";
+import {
+  createAdminPreauthToken,
+  getAdminPreauthCookieName,
+  getAdminSessionCookieName,
+} from "@/lib/auth/admin-session";
 
 const dbAny = db as any;
 
@@ -41,15 +45,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
     }
 
-    const token = await createAdminSessionToken({ adminId: admin.id, email: admin.email });
+    const token = await createAdminPreauthToken({ adminId: admin.id, email: admin.email });
 
     const response = NextResponse.json({ success: true });
-    response.cookies.set(getAdminSessionCookieName(), token, {
+    response.cookies.set(getAdminPreauthCookieName(), token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 12,
+      maxAge: 60 * 10,
+    });
+    response.cookies.set(getAdminSessionCookieName(), "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
     });
 
     return response;

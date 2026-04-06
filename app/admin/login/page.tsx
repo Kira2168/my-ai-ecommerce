@@ -32,7 +32,7 @@ export default function AdminLogin() {
     });
 
     if (res.ok) {
-      router.push("/admin");
+      router.push("/admin/mfa");
       return;
     }
 
