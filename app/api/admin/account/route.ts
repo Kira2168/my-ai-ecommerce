@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { verify } from "otplib";
 import { db } from "@/lib/db";
 import { getAdminSessionCookieName, verifyAdminSessionToken } from "@/lib/auth/admin-session";
 import { hashPassword, verifyPassword } from "@/lib/auth/admin-password";
@@ -44,10 +45,12 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
+    const resetMfa = body?.resetMfa === true;
     const nextDisplayName = typeof body.displayName === "string" ? body.displayName.trim() : undefined;
     const nextEmail = typeof body.email === "string" ? body.email.trim().toLowerCase() : undefined;
     const currentPassword = typeof body.currentPassword === "string" ? body.currentPassword : "";
     const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
+    const mfaCode = typeof body.mfaCode === "string" ? body.mfaCode.replace(/\s+/g, "") : "";
 
     const updates: Record<string, any> = {};
 
@@ -69,9 +72,42 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: "Email is already in use." }, { status: 409 });
       }
       updates.email = nextEmail;
+
+      // Force MFA re-enrollment when email changes so old authenticator entry is invalidated.
+      updates.mfaEnabled = false;
+      updates.mfaSecret = null;
     }
 
     const wantsPasswordChange = Boolean(newPassword);
+    const wantsEmailChange = typeof nextEmail === "string" && nextEmail !== admin.email;
+    const wantsMfaReset = Boolean(resetMfa);
+
+    if ((wantsEmailChange || wantsPasswordChange || wantsMfaReset) && admin.mfaEnabled) {
+      if (!/^\d{6}$/.test(mfaCode)) {
+        return NextResponse.json({ error: "6-digit MFA code is required for this sensitive action." }, { status: 400 });
+      }
+      if (!admin.mfaSecret) {
+        return NextResponse.json({ error: "MFA is enabled but secret is missing. Re-enroll MFA." }, { status: 400 });
+      }
+
+      const mfaResult = await verify({ token: mfaCode, secret: admin.mfaSecret, epochTolerance: 60 });
+      if (!(mfaResult as any)?.valid) {
+        return NextResponse.json({ error: "Invalid MFA code." }, { status: 401 });
+      }
+    }
+
+    if (wantsMfaReset) {
+      if (!currentPassword) {
+        return NextResponse.json({ error: "Current password is required to reset MFA." }, { status: 400 });
+      }
+      if (!verifyPassword(currentPassword, admin.passwordHash)) {
+        return NextResponse.json({ error: "Current password is incorrect." }, { status: 401 });
+      }
+
+      updates.mfaEnabled = false;
+      updates.mfaSecret = null;
+    }
+
     if (wantsPasswordChange) {
       if (!currentPassword) {
         return NextResponse.json({ error: "Current password is required." }, { status: 400 });
@@ -110,6 +146,8 @@ export async function PATCH(req: Request) {
         email: updatedAdmin.email,
         displayName: updatedAdmin.displayName,
       },
+      requiresMfaReenroll: Boolean(updates.email),
+      mfaReset: Boolean(wantsMfaReset),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to update account." }, { status: 500 });

@@ -38,14 +38,20 @@ export default async function AdminAccountPage() {
   });
 
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [completedOrders, pendingOrders, actions24h] = await Promise.all([
+  const [completedOrders, pendingRows, actions24h] = await Promise.all([
     db.order.count({ where: { status: "COMPLETED" } }),
-    db.order.count({ where: { status: "PENDING" } }),
+    db.order.findMany({ where: { status: "PENDING" }, select: { total: true, items: true } }),
     Promise.all([
       db.order.count({ where: { createdAt: { gte: dayAgo } } }),
       db.product.count({ where: { createdAt: { gte: dayAgo } } }),
     ]).then(([ordersCount, productsCount]) => ordersCount + productsCount),
   ]);
+
+  const pendingOrders = pendingRows.filter((row) => {
+    const total = Number((row as any).total || 0);
+    const items = Array.isArray((row as any).items) ? ((row as any).items as any[]) : [];
+    return total > 0 || items.length > 0;
+  }).length;
 
   const stats = {
     completedOrders,

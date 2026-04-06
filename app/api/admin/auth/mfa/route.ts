@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "MFA secret not initialized." }, { status: 400 });
     }
 
-    const result = await verify({ token: code, secret: admin.mfaSecret });
+    const result = await verify({ token: code, secret: admin.mfaSecret, epochTolerance: 60 });
     if (!(result as any)?.valid) {
       return NextResponse.json({ error: "Invalid code." }, { status: 401 });
     }

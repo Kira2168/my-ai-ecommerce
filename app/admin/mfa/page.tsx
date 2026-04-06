@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import QRCode from "qrcode";
 
 export default function AdminMfaPage() {
   const router = useRouter();
@@ -10,6 +11,8 @@ export default function AdminMfaPage() {
   const [setupRequired, setSetupRequired] = useState(false);
   const [email, setEmail] = useState("");
   const [secret, setSecret] = useState("");
+  const [otpauthUrl, setOtpauthUrl] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -25,10 +28,18 @@ export default function AdminMfaPage() {
       setSetupRequired(Boolean(data.setupRequired));
       setEmail(String(data.email || ""));
       setSecret(String(data.secret || ""));
+      setOtpauthUrl(String(data.otpauth || ""));
       setLoading(false);
     };
     load();
   }, [router]);
+
+  useEffect(() => {
+    if (!setupRequired || !otpauthUrl) return;
+    QRCode.toDataURL(otpauthUrl, { width: 220, margin: 1 })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(""));
+  }, [setupRequired, otpauthUrl]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +78,11 @@ export default function AdminMfaPage() {
           <div className="mb-5 p-4 rounded-2xl border border-amber-400/30 bg-amber-500/10">
             <p className="text-[10px] font-mono uppercase tracking-widest text-amber-300 mb-2">Setup Required</p>
             <p className="text-sm text-foreground/80">Add this account to your Authenticator app, then enter the 6-digit code.</p>
+            {qrDataUrl ? (
+              <div className="mt-4 rounded-xl bg-white p-3 inline-block">
+                <img src={qrDataUrl} alt="MFA QR code" className="w-44 h-44" />
+              </div>
+            ) : null}
             <p className="text-xs font-mono mt-3 break-all text-foreground/70">{email}</p>
             <p className="text-xs font-mono mt-1 break-all text-brand">Secret: {secret}</p>
           </div>

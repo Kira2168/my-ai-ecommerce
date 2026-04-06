@@ -31,8 +31,10 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
   const [account, setAccount] = useState(initialAccount);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
   const [accountSaving, setAccountSaving] = useState(false);
   const [accountMsg, setAccountMsg] = useState("");
+  const [resettingMfa, setResettingMfa] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
           email: account.email,
           currentPassword,
           newPassword,
+          mfaCode,
         }),
       });
       const data = await res.json();
@@ -90,7 +93,12 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
       setProfile((p) => ({ ...p, displayName: data.account.displayName || p.displayName }));
       setCurrentPassword("");
       setNewPassword("");
-      setAccountMsg("Account updated.");
+      setMfaCode("");
+      setAccountMsg(
+        data?.requiresMfaReenroll
+          ? "Account updated. MFA reset required: log out and scan new QR on next admin login."
+          : "Account updated."
+      );
     } finally {
       setAccountSaving(false);
     }
@@ -111,13 +119,64 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
     reader.readAsDataURL(file);
   };
 
+  const resetMfa = async () => {
+    setAccountMsg("");
+    if (!currentPassword) {
+      setAccountMsg("Enter current password to reset MFA.");
+      return;
+    }
+    if (!/^\d{6}$/.test(mfaCode)) {
+      setAccountMsg("Enter 6-digit MFA code to reset MFA.");
+      return;
+    }
+
+    const confirmed = window.confirm("Reset MFA? You will need to scan a new QR code on next login.");
+    if (!confirmed) return;
+
+    setResettingMfa(true);
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resetMfa: true, currentPassword, mfaCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAccountMsg(data?.error || "Failed to reset MFA.");
+        return;
+      }
+
+      setMfaCode("");
+      setCurrentPassword("");
+      setAccountMsg("MFA reset complete. Log out and scan a new QR code on next login.");
+    } finally {
+      setResettingMfa(false);
+    }
+  };
+
   const deleteProfile = async () => {
     const confirmed = window.confirm("Delete your admin profile? This will reset it to defaults.");
     if (!confirmed) return;
 
+    if (!/^\d{6}$/.test(mfaCode)) {
+      setAccountMsg("Enter 6-digit MFA code before deleting profile.");
+      return;
+    }
+
     setDeleting(true);
     try {
-      await fetch("/api/admin-profile", { method: "DELETE" });
+      const res = await fetch("/api/admin-profile", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mfaCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAccountMsg(data?.error || "Failed to delete profile.");
+        return;
+      }
+
+      setMfaCode("");
       await refreshProfile();
     } finally {
       setDeleting(false);
@@ -285,18 +344,48 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
               placeholder="Leave empty to keep current"
             />
           </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">MFA Code</label>
+            <input
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\D+/g, "").slice(0, 6))}
+              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand font-mono tracking-[0.3em]"
+              placeholder="123456"
+            />
+            <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-foreground/45">
+              Required when changing admin email or password or changing profile picture. 
+            </p>
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p className={`text-xs font-mono ${accountMsg === "Account updated." ? "text-emerald-400" : "text-amber-400"}`}>{accountMsg}</p>
-          <button
-            type="button"
-            onClick={saveAccount}
-            disabled={accountSaving}
-            className="px-4 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-50"
+          <p
+            className={`text-xs font-mono ${
+              accountMsg.includes("updated") || accountMsg.includes("reset complete")
+                ? "text-emerald-400"
+                : "text-amber-400"
+            }`}
           >
-            {accountSaving ? "Saving..." : "Save Account"}
-          </button>
+            {accountMsg}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={resetMfa}
+              disabled={resettingMfa || accountSaving}
+              className="px-4 py-2 rounded-xl border border-red-500/40 text-red-300 text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-50"
+            >
+              {resettingMfa ? "Resetting..." : "Reset MFA"}
+            </button>
+            <button
+              type="button"
+              onClick={saveAccount}
+              disabled={accountSaving || resettingMfa}
+              className="px-4 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-50"
+            >
+              {accountSaving ? "Saving..." : "Save Account"}
+            </button>
+          </div>
         </div>
       </div>
     </>
