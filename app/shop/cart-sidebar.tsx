@@ -3,29 +3,38 @@ import { useCart } from "@/lib/context/cart-context";
 import { X, ShoppingBag, ArrowRight, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CartSidebar() {
   const { items, isOpen, setIsOpen, removeFromCart } = useCart();
   const searchParams = useSearchParams();
   const totalPrice = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const orderId = searchParams.get("orderId");
+  const [isCustomerAuthed, setIsCustomerAuthed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/customer/auth/me", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => setIsCustomerAuthed(Boolean(data?.authenticated)))
+      .catch(() => setIsCustomerAuthed(false));
+  }, [isOpen]);
 
   return (
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60" 
           onClick={() => setIsOpen(false)} 
         />
       )}
 
-      <div className={`fixed top-0 right-0 h-full w-full md:w-[450px] bg-[var(--card-bg)] border-l border-[var(--border-color)] z-[70] transition-transform duration-500 ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+      <div className={`fixed top-0 right-0 h-full w-full md:w-112.5 bg-(--card-bg) border-l border-(--border-color) z-70 transition-transform duration-500 ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="p-6 sm:p-8 h-full flex flex-col">
           <header className="flex justify-between items-center mb-6 sm:mb-10">
-            <h2 className="text-xl sm:text-2xl font-black italic flex items-center gap-3 text-[var(--foreground)]">
+            <h2 className="text-xl sm:text-2xl font-black italic flex items-center gap-3 text-(--foreground)">
               <ShoppingBag className="text-brand w-5 h-5 sm:w-6 sm:h-6" /> YOUR BAG
             </h2>
-            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-[var(--foreground)]">
+            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-(--foreground)">
               <X className="w-6 h-6" />
             </button>
           </header>
@@ -38,15 +47,15 @@ export default function CartSidebar() {
               </div>
             ) : (
               items.map((item) => (
-                <div key={item.id} className="group flex justify-between items-center p-4 sm:p-5 bg-[var(--card-bg-secondary)] rounded-3xl border border-[var(--border-color)] hover:border-brand/30 transition-all">
+                <div key={item.id} className="group flex justify-between items-center p-4 sm:p-5 bg-(--card-bg-secondary) rounded-3xl border border-(--border-color) hover:border-brand/30 transition-all">
                   <div className="flex-1">
-                    <p className="font-bold text-[var(--foreground)] text-base sm:text-lg tracking-tight">{item.name}</p>
+                    <p className="font-bold text-(--foreground) text-base sm:text-lg tracking-tight">{item.name}</p>
                     <p className="text-brand font-mono text-xs italic mt-1">
-                      ${item.price.toFixed(2)} <span className="text-[var(--muted-text)] ml-2">x {item.quantity}</span>
+                      ${item.price.toFixed(2)} <span className="text-(--muted-text) ml-2">x {item.quantity}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <p className="font-black text-[var(--foreground)]">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-black text-(--foreground)">${(item.price * item.quantity).toFixed(2)}</p>
                     {/* DELETE BUTTON */}
                     <button 
                       onClick={() => removeFromCart(item.id)}
@@ -60,19 +69,23 @@ export default function CartSidebar() {
             )}
           </div>
 
-          <footer className="pt-6 sm:pt-8 border-t border-[var(--border-color)] mt-auto">
+          <footer className="pt-6 sm:pt-8 border-t border-(--border-color) mt-auto">
             <div className="flex justify-between items-center mb-6 sm:mb-8">
               <div>
-                <span className="text-[var(--muted-text)] uppercase font-bold text-[10px] tracking-[0.2em] block mb-1">Subtotal</span>
-                <span className="text-3xl sm:text-4xl font-black text-[var(--foreground)] tracking-tighter">${totalPrice.toFixed(2)}</span>
+                <span className="text-(--muted-text) uppercase font-bold text-[10px] tracking-[0.2em] block mb-1">Subtotal</span>
+                <span className="text-3xl sm:text-4xl font-black text-(--foreground) tracking-tighter">${totalPrice.toFixed(2)}</span>
               </div>
             </div>
             <Link 
-              href={orderId ? `/checkout?orderId=${orderId}` : "/checkout"}
+              href={
+                isCustomerAuthed
+                  ? (orderId ? `/checkout?orderId=${orderId}` : "/checkout")
+                  : `/auth/login?next=${encodeURIComponent(orderId ? `/checkout?orderId=${orderId}` : "/checkout")}`
+              }
               onClick={() => setIsOpen(false)}
               className="group flex items-center justify-between w-full py-4 sm:py-6 px-5 sm:px-8 bg-brand text-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
             >
-              <span className="uppercase tracking-widest text-xs sm:text-sm italic">Initiate Protocol</span>
+              <span className="uppercase tracking-widest text-xs sm:text-sm italic">{isCustomerAuthed ? "Initiate Protocol" : "Sign In To Checkout"}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </Link>
           </footer>

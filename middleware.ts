@@ -6,9 +6,34 @@ import {
   verifyAdminPreauthToken,
   verifyAdminSessionToken,
 } from "@/lib/auth/admin-session";
+import { getCustomerSessionCookieName, verifyCustomerSessionToken } from "@/lib/auth/customer-session";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/checkout")) {
+    const customerToken = req.cookies.get(getCustomerSessionCookieName())?.value;
+    if (!customerToken) {
+      const loginUrl = new URL("/auth/login", req.url);
+      loginUrl.searchParams.set("next", pathname + req.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    try {
+      const session = await verifyCustomerSessionToken(customerToken);
+      if (session.role !== "CUSTOMER" || !session.userId) {
+        const loginUrl = new URL("/auth/login", req.url);
+        loginUrl.searchParams.set("next", pathname + req.nextUrl.search);
+        return NextResponse.redirect(loginUrl);
+      }
+    } catch {
+      const loginUrl = new URL("/auth/login", req.url);
+      loginUrl.searchParams.set("next", pathname + req.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    return NextResponse.next();
+  }
 
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
@@ -64,5 +89,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/checkout/:path*"],
 };

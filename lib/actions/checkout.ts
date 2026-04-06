@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { getCustomerSessionCookieName, verifyCustomerSessionToken } from "@/lib/auth/customer-session";
 
 type OrderItemPayload = {
   id: string;
@@ -110,6 +112,24 @@ export async function addItemToOrder(orderId: string, product: OrderItemPayload)
  */
 export async function processOrder(items: any[], orderId?: string | null) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(getCustomerSessionCookieName())?.value;
+    if (!token) {
+      return { success: false, error: "CUSTOMER_LOGIN_REQUIRED" };
+    }
+
+    let customerSession: { userId: string; role: string } | null = null;
+    try {
+      const session = await verifyCustomerSessionToken(token);
+      customerSession = { userId: session.userId, role: session.role };
+    } catch {
+      customerSession = null;
+    }
+
+    if (!customerSession || customerSession.role !== "CUSTOMER" || !customerSession.userId) {
+      return { success: false, error: "CUSTOMER_LOGIN_REQUIRED" };
+    }
+
     if (!items || items.length === 0) {
       return { success: false, error: "MANIFEST_EMPTY" };
     }
@@ -146,7 +166,8 @@ export async function processOrder(items: any[], orderId?: string | null) {
           where: { id: orderId },
           data: { 
             status: "COMPLETED",
-            items: items // Final snapshot of items
+            items: items,
+            userId: customerSession.userId,
           },
         })
       ] : [])
