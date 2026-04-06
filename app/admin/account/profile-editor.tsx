@@ -1,0 +1,185 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Camera, Save, Loader2 } from "lucide-react";
+
+type Profile = {
+  displayName: string;
+  image: string | null;
+  mfaEnabled: boolean;
+  apiKeyRotatedAt: string | null;
+  lastLoginAt: string | null;
+};
+
+type Stats = {
+  completedOrders: number;
+  pendingOrders: number;
+  actions24h: number;
+  riskLevel: string;
+};
+
+export default function ProfileEditor({ initialProfile, initialStats }: { initialProfile: Profile; initialStats: Stats }) {
+  const [profile, setProfile] = useState(initialProfile);
+  const [stats, setStats] = useState(initialStats);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/admin-profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ touchLastLogin: true }),
+    }).catch(() => undefined);
+  }, []);
+
+  const refreshProfile = async () => {
+    const res = await fetch("/api/admin-profile", { cache: "no-store" });
+    const data = await res.json();
+    if (data?.profile) {
+      setProfile(data.profile);
+      setStats(data.stats);
+    }
+  };
+
+  const saveProfile = async (payload: Record<string, any>) => {
+    setSaving(true);
+    try {
+      await fetch("/api/admin-profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      await refreshProfile();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFile = (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image too large. Max 2MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const img = String(reader.result || "");
+      await saveProfile({ image: img });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const lastLogin = profile.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString() : "No login data";
+  const rotatedAt = profile.apiKeyRotatedAt ? new Date(profile.apiKeyRotatedAt).toLocaleDateString() : "Not recorded";
+
+  return (
+    <>
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2 p-5 sm:p-6 rounded-3xl border border-white/10 bg-(--card-bg-secondary)">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="relative w-20 h-20 rounded-2xl border border-brand/40 bg-brand/10 overflow-hidden shrink-0"
+                title="Upload profile picture"
+              >
+                {profile.image ? (
+                  <img src={profile.image} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-brand">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                )}
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+              />
+
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Operator Profile</p>
+                <input
+                  value={profile.displayName}
+                  onChange={(e) => setProfile((p) => ({ ...p, displayName: e.target.value }))}
+                  className="bg-transparent border border-white/10 rounded-xl px-3 py-2 text-xl sm:text-2xl font-black uppercase tracking-tight w-full max-w-md outline-none focus:border-brand"
+                />
+                <p className="text-sm text-foreground/60 mt-2 max-w-xl">
+                  Primary system maintainer. Handles drops, inventory control, order operations, and AI storefront tuning.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => saveProfile({ displayName: profile.displayName })}
+              disabled={saving}
+              className="px-3 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-60 flex items-center gap-2"
+            >
+              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
+            </button>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Access Level</p>
+              <p className="text-xl font-black text-foreground">Admin</p>
+            </div>
+            <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Completed Orders</p>
+              <p className="text-xl font-black text-foreground">{stats.completedOrders}</p>
+            </div>
+            <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+              <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-2">Pending Orders</p>
+              <p className="text-xl font-black text-foreground">{stats.pendingOrders}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-5 sm:p-6 rounded-3xl border border-white/10 bg-(--card-bg-secondary)">
+          <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-4">Security Posture</p>
+          <div className="space-y-4 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-foreground/60">MFA</span>
+              <span className={`${profile.mfaEnabled ? "text-emerald-400" : "text-red-400"} font-bold`}>
+                {profile.mfaEnabled ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-foreground/60">API Key Rotated</span>
+              <span className="text-foreground font-bold">{rotatedAt}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-foreground/60">Risk Level</span>
+              <span className={`${stats.riskLevel === "Low" ? "text-emerald-400" : "text-amber-400"} font-bold`}>
+                {stats.riskLevel}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 p-5 sm:p-6 rounded-3xl border border-white/10 bg-(--card-bg-secondary)">
+        <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-4">Recent Operator Activity</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/50">Last Login</p>
+            <p className="mt-2 text-lg font-black">{lastLogin}</p>
+          </div>
+          <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/50">Actions (24h)</p>
+            <p className="mt-2 text-lg font-black">{stats.actions24h} Events</p>
+          </div>
+          <div className="p-4 rounded-2xl border border-white/5 bg-(--card-bg)">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/50">Profile Image</p>
+            <p className="mt-2 text-lg font-black">{profile.image ? "Configured" : "Not set"}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

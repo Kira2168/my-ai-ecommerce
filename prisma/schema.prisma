@@ -24,6 +24,17 @@ model Category {
   createdAt DateTime @default(now())
 }
 
+model AdminProfile {
+  id               String   @id @default("main")
+  displayName      String   @default("Kirubel Adisu")
+  image            String?
+  mfaEnabled       Boolean  @default(true)
+  apiKeyRotatedAt  DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 model Order {
   id        String   @id @default(cuid())
   total     Float
