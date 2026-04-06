@@ -101,7 +101,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* --- ANALYTICS PULSE --- */}
-        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
+        <div className="bg-(--card-bg) border border-(--border-color) rounded-4xl sm:rounded-[3rem] p-6 sm:p-8 mb-12 sm:mb-16">
           <div className="flex items-center gap-3 mb-6">
             <Activity className="text-brand w-4 h-4" />
             <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Analytics Pulse</h2>
@@ -124,8 +124,8 @@ export default async function AdminDashboard() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* --- LEFT: ASSET MANIFEST --- */}
-          <div className="xl:col-span-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
-            <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
+          <div className="xl:col-span-2 bg-(--card-bg) border border-(--border-color) rounded-4xl sm:rounded-[3rem] overflow-hidden shadow-2xl">
+            <div className="p-5 sm:p-8 border-b border-(--border-color) flex items-center gap-4 bg-(--card-bg-secondary)">
               <Terminal className="text-brand w-4 h-4" />
               <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Asset Manifest</h2>
             </div>
@@ -191,17 +191,17 @@ export default async function AdminDashboard() {
           <div className="flex flex-col gap-8">
             <CategoryManager />
 
-            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
-              <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
+            <div className="bg-(--card-bg) border border-(--border-color) rounded-4xl sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col">
+              <div className="p-5 sm:p-8 border-b border-(--border-color) flex items-center gap-4 bg-(--card-bg-secondary)">
                 <History className="text-brand w-4 h-4" />
                 <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Transmission Log</h2>
               </div>
-              <div className="p-4 sm:p-5 space-y-4 max-h-[700px] overflow-y-auto custom-scrollbar">
+              <div className="p-4 sm:p-5 space-y-4 max-h-175 overflow-y-auto custom-scrollbar">
                 {orders.length === 0 ? (
                   <div className="p-20 text-center text-foreground/30 font-mono text-[10px] uppercase tracking-widest">No Signals</div>
                 ) : (
                   orders.map((order) => (
-                    <div key={order.id} className="p-4 sm:p-5 rounded-[2rem] bg-[var(--card-bg-secondary)] border border-(--border-color) hover:border-brand/40 transition-all group relative overflow-hidden">
+                    <div key={order.id} className="p-4 sm:p-5 rounded-4xl bg-(--card-bg-secondary) border border-(--border-color) hover:border-brand/40 transition-all group relative overflow-hidden">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 relative z-10">
                         <div>
                           <p className="text-[8px] font-mono text-foreground/45 uppercase mb-2 tracking-tighter">TRANS_ID: {order.id.slice(-8)}</p>
@@ -217,7 +217,7 @@ export default async function AdminDashboard() {
                       <div className="space-y-2 mb-4 relative z-10">
                         {(order.items as any[])?.map((item, idx) => (
                           <div key={idx} className="flex justify-between text-[9px] sm:text-[10px] font-mono text-foreground/65 bg-(--card-bg) px-3 py-1.5 rounded-lg border border-(--border-color)">
-                            <span className="uppercase truncate max-w-[120px]">{item.name}</span>
+                            <span className="uppercase truncate max-w-30">{item.name}</span>
                             <span className="text-brand">x{item.quantity}</span>
                           </div>
                         ))}

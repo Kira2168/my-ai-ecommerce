@@ -1,25 +1,47 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
-export default function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
+type ThemeScope = "shop" | "admin";
+
+const KEY_BY_SCOPE: Record<ThemeScope, string> = {
+  shop: "futureshop-theme-shop",
+  admin: "futureshop-theme-admin",
+};
+
+function applyTheme(theme: "dark" | "light") {
+  const root = document.documentElement;
+  root.classList.remove("dark", "light");
+  root.classList.add(theme);
+}
+
+export default function ThemeToggle({ scope = "shop" }: { scope?: ThemeScope }) {
   const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   // This ensures the code only runs on the client to avoid errors
   useEffect(() => {
+    const key = KEY_BY_SCOPE[scope];
+    const saved = localStorage.getItem(key);
+    const dark = saved !== "light";
+    setIsDark(dark);
     setMounted(true);
-  }, []);
+  }, [scope]);
 
   if (!mounted) return <div className="w-14 h-7 bg-white/5 rounded-full" />;
 
-  const isDark = resolvedTheme === "dark";
+  const toggleTheme = () => {
+    const nextIsDark = !isDark;
+    const nextTheme = nextIsDark ? "dark" : "light";
+    setIsDark(nextIsDark);
+    localStorage.setItem(KEY_BY_SCOPE[scope], nextTheme);
+    applyTheme(nextTheme);
+  };
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={toggleTheme}
       className="relative w-14 h-7 flex items-center rounded-full p-1 transition-all duration-500 border group overflow-hidden"
     >
       {/* Background Track */}

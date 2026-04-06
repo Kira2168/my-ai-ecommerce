@@ -14,10 +14,10 @@ export default function AdminHeader() {
         </div>
         <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.3em]">Exit Terminal</span>
       </Link>
-      <div className="hidden sm:block h-px flex-1 mx-8 bg-gradient-to-r from-foreground/15 to-transparent" />
+      <div className="hidden sm:block h-px flex-1 mx-8 bg-linear-to-r from-foreground/15 to-transparent" />
       <div className="flex items-center gap-4">
         <div className="text-[8px] sm:text-[9px] font-mono text-foreground/45 uppercase tracking-widest">Secure Node: 01-Kirubel</div>
-        <ThemeToggle />
+        <ThemeToggle scope="admin" />
         <AdminMenu />
       </div>
     </div>

@@ -56,10 +56,10 @@ export default function CategoryManager() {
   };
 
   return (
-    <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl">
-      <div className="p-5 sm:p-8 border-b border-white/5 flex items-center gap-4 bg-[var(--card-bg-secondary)]">
+    <div className="bg-(--card-bg) border border-(--border-color) rounded-4xl sm:rounded-[3rem] overflow-hidden shadow-2xl">
+      <div className="p-5 sm:p-8 border-b border-(--border-color) flex items-center gap-4 bg-(--card-bg-secondary)">
         <Tag className="text-brand w-4 h-4" />
-        <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-white/40">Category Control</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] font-bold text-foreground/45">Category Control</h2>
       </div>
 
       <div className="p-5 sm:p-8 space-y-6">
@@ -68,7 +68,7 @@ export default function CategoryManager() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="NEW CATEGORY"
-                className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-brand transition-all"
+                    className="flex-1 bg-(--card-bg-secondary) border border-(--border-color) rounded-xl px-4 py-3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.3em] text-foreground placeholder:text-foreground/40 outline-none focus:border-brand transition-all"
           />
           <button
             type="button"
@@ -80,16 +80,16 @@ export default function CategoryManager() {
           </button>
         </div>
 
-        <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+        <div className="space-y-3 max-h-75 overflow-y-auto custom-scrollbar pr-1">
           {categories.length === 0 ? (
-            <div className="p-6 text-center text-white/20 font-mono text-[9px] uppercase tracking-widest">
+            <div className="p-6 text-center text-foreground/35 font-mono text-[9px] uppercase tracking-widest">
               No categories yet
             </div>
           ) : (
             categories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg-secondary)] border border-white/5"
+                className="flex items-center justify-between p-3 rounded-2xl bg-(--card-bg-secondary) border border-(--border-color)"
               >
                 <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-foreground/70">
                   {category.name}

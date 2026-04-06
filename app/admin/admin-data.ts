@@ -73,13 +73,15 @@ export async function getProductsSafe(): Promise<AdminProduct[]> {
 export async function getOrdersSafe(): Promise<AdminOrder[]> {
   try {
     const rows = await db.order.findMany({ orderBy: { createdAt: "desc" }, take: 60 });
-    return rows.map((row) => ({
+    return rows
+      .map((row) => ({
       id: row.id,
       total: Number(row.total ?? 0),
       status: row.status ?? "PENDING",
       items: Array.isArray(row.items) ? (row.items as any[]) : [],
       createdAt: row.createdAt ? new Date(row.createdAt) : new Date(0),
-    }));
+      }))
+      .filter((row) => row.status !== "PENDING" || row.items.length > 0 || row.total > 0);
   } catch (error) {
     console.error("ADMIN_ORDER_FETCH_FAILED:", error);
 
@@ -102,12 +104,14 @@ export async function getOrdersSafe(): Promise<AdminOrder[]> {
     const query = `SELECT ${selectParts.join(", ")} FROM "Order"${orderBy} LIMIT 60`;
     const rows = await db.$queryRawUnsafe<any[]>(query);
 
-    return rows.map((row) => ({
+    return rows
+      .map((row) => ({
       id: String(row.id ?? ""),
       total: Number(row.total ?? 0),
       status: String(row.status ?? "PENDING"),
       items: Array.isArray(row.items) ? row.items : [],
       createdAt: row.createdAt ? new Date(row.createdAt) : new Date(0),
-    }));
+      }))
+      .filter((row) => row.status !== "PENDING" || row.items.length > 0 || row.total > 0);
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Terminal, Cpu, ShieldAlert } from "lucide-react";
 import StarField from "@/components/StarField";
-import { createOrderAction } from "@/lib/actions/create-order";
+import Link from "next/link";
 
 export default function Home() {
   // 1. Pattern to fix Hydration Mismatch - Ensures client-side only features (video/stars) don't conflict with SSR
@@ -74,9 +74,9 @@ export default function Home() {
 
         {/* 5. INITIATE ACCESS BUTTON (Triggers create-order.ts) */}
         <div className="flex flex-col items-center gap-6">
-          <form action={createOrderAction}>
-            <button 
-              type="submit"
+          <Link href="/shop">
+            <button
+              type="button"
               className="group relative px-8 sm:px-14 py-4 sm:py-6 transition-all duration-500 overflow-hidden outline-none"
               style={{ clipPath: "polygon(0 15%, 15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%)" }}
             >
@@ -100,7 +100,7 @@ export default function Home() {
               {/* OUTER GLOW */}
               <div className="absolute inset-0 bg-violet-500/0 group-hover:bg-violet-500/25 blur-xl transition-all duration-500 -z-10" />
             </button>
-          </form>
+          </Link>
 
           {/* HIDDEN ADMIN ENTRANCE */}
           <div className="mt-10 sm:mt-16 opacity-0 hover:opacity-100 transition-opacity duration-700">

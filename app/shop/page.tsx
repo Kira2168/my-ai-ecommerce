@@ -144,6 +144,9 @@ const filteredProducts = products.filter(p => {
                     {isSoldOut ? "Out of stock" : `${stockCount} left in stock`}
                   </p>
                   <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 uppercase text-foreground group-hover:text-brand transition-colors">{product.name}</h2>
+                  <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-foreground/65 mb-4">
+                    Click item to see more detail
+                  </p>
                   <div className="flex justify-between items-center relative z-40">
                     <span className="text-xl sm:text-2xl font-black font-mono text-foreground">${Number(product.price).toFixed(2)}</span>
                     {!isSoldOut && <QuickAddButton product={product} orderId={orderId} />}
