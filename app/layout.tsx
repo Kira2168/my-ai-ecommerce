@@ -29,8 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* --- FIXED BACKGROUND AURAS --- */}
           <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden h-full w-full">
-            <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-brand/5 blur-[140px] animate-pulse" />
-            <div className="absolute bottom-[-5%] right-[-5%] w-[500px] h-[500px] rounded-full bg-purple-600/5 blur-[140px]" />
+            <div className="absolute top-[-10%] left-[-10%] w-150 h-150 rounded-full bg-brand/5 blur-[140px] animate-pulse" />
+            <div className="absolute bottom-[-5%] right-[-5%] w-125 h-125 rounded-full bg-purple-600/5 blur-[140px]" />
           </div>
         </CartProvider>
         

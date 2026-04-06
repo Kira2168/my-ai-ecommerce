@@ -2,6 +2,7 @@ import { History } from "lucide-react";
 import AdminHeader from "../admin-header";
 import { getOrdersSafe } from "../admin-data";
 import ClearTransactionsButton, { OrderStatusButton } from "./clear-transactions-button";
+import CleanupEmptyOrdersButton from "./cleanup-empty-orders-button";
 import Link from "next/link";
 import DeleteOrderButton from "./delete-order-button";
 
@@ -44,7 +45,10 @@ export default async function AdminOrdersPage({
             <History className="text-brand w-5 h-5" />
             <h1 className="text-3xl sm:text-5xl font-black italic tracking-tighter uppercase text-foreground">Orders</h1>
           </div>
-          <ClearTransactionsButton />
+          <div className="flex items-center gap-2">
+            <CleanupEmptyOrdersButton />
+            <ClearTransactionsButton />
+          </div>
         </div>
 
         <div className="mb-6 flex flex-wrap items-center gap-3">

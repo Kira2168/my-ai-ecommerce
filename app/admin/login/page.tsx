@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff, ShieldCheck, AlertOctagon, ZapOff, Radio } from "lucide-react";
 
 export default function AdminLogin() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [show, setShow] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isSelfDestructing, setIsSelfDestructing] = useState(false);
@@ -19,17 +21,27 @@ export default function AdminLogin() {
     }
   }, [isSelfDestructing, timeLeft]);
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
+    setError("");
+
+    const res = await fetch("/api/admin/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (res.ok) {
       router.push("/admin");
-    } else {
-      const nextAttempt = attempts + 1;
-      setAttempts(nextAttempt);
-      setPassword("");
-      if (nextAttempt >= 3) {
-        setIsSelfDestructing(true);
-      }
+      return;
+    }
+
+    const nextAttempt = attempts + 1;
+    setAttempts(nextAttempt);
+    setPassword("");
+    setError("Invalid credentials.");
+    if (nextAttempt >= 3) {
+      setIsSelfDestructing(true);
     }
   };
 
@@ -37,7 +49,7 @@ export default function AdminLogin() {
     return (
       <main className={`min-h-screen bg-black flex flex-col items-center justify-center p-6 text-red-600 overflow-hidden ${timeLeft === 0 ? 'animate-glitch' : ''}`}>
         {/* Pulsing Scanline Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 pointer-events-none bg-[length:100%_2px,3px_100%]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 pointer-events-none bg-size-[100%_2px,3px_100%]" />
         
         <div className="relative z-10 flex flex-col items-center gap-6 max-w-xl text-center">
           <div className="relative">
@@ -84,8 +96,8 @@ export default function AdminLogin() {
 
   return (
     <main className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-      <div className="w-full max-w-md p-10 rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl relative overflow-hidden">
-        <div className={`absolute top-0 left-0 h-1 transition-all duration-500 bg-gradient-to-r from-transparent via-red-500 to-transparent ${attempts > 0 ? 'w-full opacity-100' : 'w-0 opacity-0'}`} />
+      <div className="w-full max-w-md p-10 rounded-[2.5rem] border border-white/10 bg-white/2 backdrop-blur-3xl relative overflow-hidden">
+        <div className={`absolute top-0 left-0 h-1 transition-all duration-500 bg-linear-to-r from-transparent via-red-500 to-transparent ${attempts > 0 ? 'w-full opacity-100' : 'w-0 opacity-0'}`} />
         
         <div className="text-center mb-10">
           <div className="inline-flex p-4 rounded-2xl bg-red-500/10 border border-red-500/20 mb-6">
@@ -104,12 +116,22 @@ export default function AdminLogin() {
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div className="relative">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ADMIN EMAIL"
+              className="w-full bg-white/3 border border-white/10 rounded-xl py-4 px-6 text-white font-mono text-sm outline-none focus:border-red-500/50 transition-all placeholder:text-white/10"
+              required
+            />
+          </div>
+          <div className="relative">
             <input 
               type={show ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="ENTER ENCRYPTION KEY"
-              className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-4 px-6 text-white font-mono text-sm outline-none focus:border-red-500/50 transition-all placeholder:text-white/10"
+              placeholder="ENTER ADMIN PASSWORD"
+              className="w-full bg-white/3 border border-white/10 rounded-xl py-4 px-6 text-white font-mono text-sm outline-none focus:border-red-500/50 transition-all placeholder:text-white/10"
               required
             />
             <button 
@@ -120,6 +142,8 @@ export default function AdminLogin() {
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+
+          {error ? <p className="text-[10px] font-mono text-red-400 uppercase tracking-widest">{error}</p> : null}
 
           <button className="w-full py-4 bg-white text-black font-black rounded-xl uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 group active:scale-95">
             Authenticate <ShieldCheck className="w-4 h-4" />

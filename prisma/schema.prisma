@@ -35,6 +35,15 @@ model AdminProfile {
   updatedAt        DateTime @updatedAt
 }
 
+model AdminUser {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  displayName   String
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Order {
   id        String   @id @default(cuid())
   total     Float
