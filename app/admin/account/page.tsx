@@ -2,11 +2,30 @@ import { ShieldCheck } from "lucide-react";
 import AdminHeader from "../admin-header";
 import { db } from "@/lib/db";
 import ProfileEditor from "./profile-editor";
+import { cookies } from "next/headers";
+import { getAdminSessionCookieName, verifyAdminSessionToken } from "@/lib/auth/admin-session";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAccountPage() {
   const dbAny = db as any;
+
+  let adminAccount = { email: "", displayName: "Admin" };
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(getAdminSessionCookieName())?.value;
+    if (token) {
+      const session = await verifyAdminSessionToken(token);
+      if (session.adminId) {
+        const admin = await dbAny.adminUser.findUnique({ where: { id: session.adminId } });
+        if (admin) {
+          adminAccount = { email: admin.email, displayName: admin.displayName };
+        }
+      }
+    }
+  } catch {
+    // Middleware already guards this route; keep resilient fallback.
+  }
 
   const profile = await dbAny.adminProfile.upsert({
     where: { id: "main" },
@@ -47,7 +66,7 @@ export default async function AdminAccountPage() {
 
         <div className="relative overflow-hidden bg-(--card-bg) border border-(--border-color) rounded-4xl sm:rounded-[3rem] p-6 sm:p-8">
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(0,242,255,0.12),transparent_45%)]" />
-          <ProfileEditor initialProfile={profile} initialStats={stats} />
+          <ProfileEditor initialProfile={profile} initialStats={stats} initialAccount={adminAccount} />
         </div>
       </div>
     </div>

@@ -18,11 +18,21 @@ type Stats = {
   riskLevel: string;
 };
 
-export default function ProfileEditor({ initialProfile, initialStats }: { initialProfile: Profile; initialStats: Stats }) {
+type Account = {
+  email: string;
+  displayName: string;
+};
+
+export default function ProfileEditor({ initialProfile, initialStats, initialAccount }: { initialProfile: Profile; initialStats: Stats; initialAccount: Account }) {
   const [profile, setProfile] = useState(initialProfile);
   const [stats, setStats] = useState(initialStats);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [account, setAccount] = useState(initialAccount);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [accountSaving, setAccountSaving] = useState(false);
+  const [accountMsg, setAccountMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,6 +63,36 @@ export default function ProfileEditor({ initialProfile, initialStats }: { initia
       await refreshProfile();
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveAccount = async () => {
+    setAccountMsg("");
+    setAccountSaving(true);
+    try {
+      const res = await fetch("/api/admin/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: account.displayName,
+          email: account.email,
+          currentPassword,
+          newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAccountMsg(data?.error || "Failed to save account.");
+        return;
+      }
+
+      setAccount((prev) => ({ ...prev, ...data.account }));
+      setProfile((p) => ({ ...p, displayName: data.account.displayName || p.displayName }));
+      setCurrentPassword("");
+      setNewPassword("");
+      setAccountMsg("Account updated.");
+    } finally {
+      setAccountSaving(false);
     }
   };
 
@@ -202,6 +242,61 @@ export default function ProfileEditor({ initialProfile, initialStats }: { initia
             <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/50">Profile Image</p>
             <p className="mt-2 text-lg font-black">{profile.image ? "Configured" : "Not set"}</p>
           </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 mt-6 p-5 sm:p-6 rounded-3xl border border-white/10 bg-(--card-bg-secondary)">
+        <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-foreground/40 mb-4">Admin Credentials</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">Admin Name</label>
+            <input
+              value={account.displayName}
+              onChange={(e) => setAccount((a) => ({ ...a, displayName: e.target.value }))}
+              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">Admin Email</label>
+            <input
+              type="email"
+              value={account.email}
+              onChange={(e) => setAccount((a) => ({ ...a, email: e.target.value }))}
+              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand"
+              placeholder="Required to change password"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand"
+              placeholder="Leave empty to keep current"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className={`text-xs font-mono ${accountMsg === "Account updated." ? "text-emerald-400" : "text-amber-400"}`}>{accountMsg}</p>
+          <button
+            type="button"
+            onClick={saveAccount}
+            disabled={accountSaving}
+            className="px-4 py-2 rounded-xl bg-brand text-black text-[10px] font-mono uppercase tracking-[0.3em] disabled:opacity-50"
+          >
+            {accountSaving ? "Saving..." : "Save Account"}
+          </button>
         </div>
       </div>
     </>
