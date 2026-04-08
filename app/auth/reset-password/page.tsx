@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function CustomerResetPasswordPage() {
+  const router = useRouter();
   const params = useSearchParams();
   const token = params.get("token") || "";
   const [newPassword, setNewPassword] = useState("");
@@ -48,6 +50,7 @@ export default function CustomerResetPasswordPage() {
       setMessage("Password updated. You can now log in with the new password.");
       setNewPassword("");
       setConfirmPassword("");
+      setTimeout(() => router.push("/"), 1200);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -96,7 +99,7 @@ export default function CustomerResetPasswordPage() {
         {error && <p className="text-sm text-red-300">{error}</p>}
 
         <p className="text-sm text-cyan-100/80">
-          Back to <Link href="/auth/login" className="text-cyan-200 underline">login</Link>
+          Back to <Link href="/" className="text-cyan-200 underline">home</Link>
         </p>
       </form>
     </main>

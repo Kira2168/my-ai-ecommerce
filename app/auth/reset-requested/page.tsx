@@ -12,7 +12,7 @@ export default function CustomerResetRequestedPage() {
           Open the email and use the button to continue to the reset password page.
         </p>
         <div className="pt-2">
-          <Link href="/auth/login" className="text-brand underline">Back to login</Link>
+          <Link href="/" className="text-brand underline">Back to home</Link>
         </div>
       </div>
     </main>

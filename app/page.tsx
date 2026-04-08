@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Terminal, Cpu, ShieldAlert } from "lucide-react";
+import { Terminal, Cpu, ShieldAlert, CheckCircle2 } from "lucide-react";
 import StarField from "@/components/StarField";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [authSuccess, setAuthSuccess] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -29,6 +30,7 @@ export default function Home() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
+    setAuthSuccess("");
     setAuthLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/customer/auth/login" : "/api/customer/auth/signup";
@@ -48,8 +50,12 @@ export default function Home() {
         setAuthError(data?.error || "Auth failed.");
         return;
       }
-
-      router.push("/shop");
+      const successText =
+        mode === "signup"
+          ? "Account created successfully. Taking you to the shop..."
+          : "Sign in successful. Loading your shopping session...";
+      setAuthSuccess(successText);
+      setTimeout(() => router.push("/shop"), 900);
     } finally {
       setAuthLoading(false);
     }
@@ -152,7 +158,11 @@ export default function Home() {
               <div className="flex items-center gap-2 bg-black/35 p-1 rounded-full border border-white/15">
                 <button
                   type="button"
-                  onClick={() => setMode("login")}
+                  onClick={() => {
+                    setMode("login");
+                    setAuthError("");
+                    setAuthSuccess("");
+                  }}
                   className={`px-3 py-1.5 rounded-full text-[9px] font-mono uppercase tracking-widest border transition-all ${
                     mode === "login"
                       ? "bg-brand text-black border-brand shadow-[0_0_15px_rgba(0,242,255,0.45)]"
@@ -163,7 +173,11 @@ export default function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMode("signup")}
+                  onClick={() => {
+                    setMode("signup");
+                    setAuthError("");
+                    setAuthSuccess("");
+                  }}
                   className={`px-3 py-1.5 rounded-full text-[9px] font-mono uppercase tracking-widest border transition-all ${
                     mode === "signup"
                       ? "bg-brand text-black border-brand shadow-[0_0_15px_rgba(0,242,255,0.45)]"
@@ -211,6 +225,15 @@ export default function Home() {
                   >
                     Forgot Password?
                   </Link>
+                </div>
+              ) : null}
+
+              {authSuccess ? (
+                <div className="rounded-xl border border-emerald-300/45 bg-emerald-400/10 px-3 py-2 text-emerald-200 animate-pulse">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.15em] flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {authSuccess}
+                  </p>
                 </div>
               ) : null}
 

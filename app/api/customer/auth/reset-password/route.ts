@@ -3,8 +3,6 @@ import { createHash } from "node:crypto";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/admin-password";
 
-const dbAny = db as any;
-
 function sha256(input: string) {
   return createHash("sha256").update(input).digest("hex");
 }
@@ -23,26 +21,37 @@ export async function POST(req: Request) {
     }
 
     const tokenHash = sha256(token);
-    const row = await dbAny.customerPasswordResetToken.findUnique({ where: { tokenHash } });
+    const rows = await db.$queryRaw<Array<{ id: string; email: string; expiresAt: Date; usedAt: Date | null }>>`
+      SELECT "id", "email", "expiresAt", "usedAt"
+      FROM "CustomerPasswordResetToken"
+      WHERE "tokenHash" = ${tokenHash}
+      LIMIT 1
+    `;
+    const row = rows[0];
 
     if (!row || row.usedAt || new Date(row.expiresAt) < new Date()) {
       return NextResponse.json({ error: "Reset link is invalid or expired." }, { status: 400 });
     }
 
-    await db.$transaction([
-      dbAny.customerUser.update({
-        where: { email: row.email },
-        data: { passwordHash: hashPassword(newPassword) },
-      }),
-      dbAny.customerPasswordResetToken.update({
-        where: { id: row.id },
-        data: { usedAt: new Date() },
-      }),
-      dbAny.customerPasswordResetToken.updateMany({
-        where: { email: row.email, usedAt: null },
-        data: { usedAt: new Date() },
-      }),
-    ]);
+    await db.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        UPDATE "CustomerUser"
+        SET "passwordHash" = ${hashPassword(newPassword)}, "updatedAt" = NOW()
+        WHERE "email" = ${row.email}
+      `;
+
+      await tx.$executeRaw`
+        UPDATE "CustomerPasswordResetToken"
+        SET "usedAt" = NOW()
+        WHERE "id" = ${row.id}
+      `;
+
+      await tx.$executeRaw`
+        UPDATE "CustomerPasswordResetToken"
+        SET "usedAt" = NOW()
+        WHERE "email" = ${row.email} AND "usedAt" IS NULL
+      `;
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

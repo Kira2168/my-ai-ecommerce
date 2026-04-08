@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 
 export default function CustomerSignupPage() {
   const router = useRouter();
@@ -14,11 +15,13 @@ export default function CustomerSignupPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const res = await fetch("/api/customer/auth/signup", {
         method: "POST",
@@ -30,7 +33,8 @@ export default function CustomerSignupPage() {
         setError(data?.error || "Signup failed.");
         return;
       }
-      router.replace(next);
+      setSuccess("Account created successfully. Entering store...");
+      setTimeout(() => router.replace(next), 900);
     } finally {
       setLoading(false);
     }
@@ -66,6 +70,14 @@ export default function CustomerSignupPage() {
             className="w-full rounded-xl border border-(--border-color) bg-(--card-bg-secondary) px-4 py-3 outline-none focus:border-brand"
             required
           />
+          {success ? (
+            <div className="rounded-xl border border-emerald-300/40 bg-emerald-400/10 px-3 py-2 text-emerald-200 animate-pulse">
+              <p className="text-xs font-mono uppercase tracking-widest flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                {success}
+              </p>
+            </div>
+          ) : null}
           {error ? <p className="text-xs font-mono uppercase tracking-widest text-red-400">{error}</p> : null}
           <button
             type="submit"

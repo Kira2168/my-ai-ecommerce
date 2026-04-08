@@ -64,7 +64,7 @@ export default function CustomerForgotPasswordPage() {
         {error && <p className="text-sm text-red-300">{error}</p>}
 
         <p className="text-sm text-cyan-100/80">
-          Back to <Link href="/auth/login" className="text-cyan-200 underline">login</Link>
+          Back to <Link href="/" className="text-cyan-200 underline">home</Link>
         </p>
       </form>
     </main>
