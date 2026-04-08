@@ -203,6 +203,17 @@ export default function Home() {
                 required
               />
 
+              {mode === "login" ? (
+                <div className="text-right">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-200/85 hover:text-cyan-100"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
+              ) : null}
+
               {authError ? <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">{authError}</p> : null}
 
               <button
