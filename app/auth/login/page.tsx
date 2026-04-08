@@ -58,6 +58,11 @@ export default function CustomerLoginPage() {
             className="w-full rounded-xl border border-(--border-color) bg-(--card-bg-secondary) px-4 py-3 outline-none focus:border-brand"
             required
           />
+          <div className="text-right text-sm">
+            <Link href="/auth/forgot-password" className="text-brand">
+              Forgot password?
+            </Link>
+          </div>
           {error ? <p className="text-xs font-mono uppercase tracking-widest text-red-400">{error}</p> : null}
           <button
             type="submit"
