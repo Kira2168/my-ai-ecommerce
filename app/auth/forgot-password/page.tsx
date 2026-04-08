@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CustomerForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [debugResetUrl, setDebugResetUrl] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    setMessage("");
-    setDebugResetUrl("");
     setLoading(true);
 
     try {
@@ -29,9 +27,7 @@ export default function CustomerForgotPasswordPage() {
         setError(data.error || "Failed to request reset link.");
         return;
       }
-
-      setMessage("If an account exists for that email, a reset link is ready.");
-      if (data.resetUrl) setDebugResetUrl(String(data.resetUrl));
+      router.push("/auth/reset-requested");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -65,14 +61,7 @@ export default function CustomerForgotPasswordPage() {
           {loading ? "Requesting..." : "Send reset link"}
         </button>
 
-        {message && <p className="text-sm text-green-300">{message}</p>}
         {error && <p className="text-sm text-red-300">{error}</p>}
-
-        {debugResetUrl && (
-          <p className="rounded-lg border border-cyan-200/20 bg-black/25 p-2 text-xs text-cyan-100/85 break-all">
-            Dev reset link: <a className="underline" href={debugResetUrl}>{debugResetUrl}</a>
-          </p>
-        )}
 
         <p className="text-sm text-cyan-100/80">
           Back to <Link href="/auth/login" className="text-cyan-200 underline">login</Link>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash, randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
+import { sendCustomerResetEmail } from "@/lib/auth/customer-reset-email";
 
 const dbAny = db as any;
 
@@ -42,8 +43,8 @@ export async function POST(req: Request) {
     const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const resetUrl = `${origin}/auth/reset-password?token=${rawToken}`;
 
-    // TODO: send resetUrl via email provider.
-    return NextResponse.json({ success: true, resetUrl });
+    await sendCustomerResetEmail(email, resetUrl);
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to start reset." }, { status: 500 });
   }
