@@ -9,6 +9,7 @@ export async function sendCustomerResetEmail(email: string, resetUrl: string) {
   const port = Number(getEnv("SMTP_PORT") || "587");
   const user = getEnv("SMTP_USER");
   const pass = getEnv("SMTP_PASS");
+  const fromName = getEnv("RESET_FROM_NAME") || "Lucy.Gebeya";
   const from = getEnv("RESET_FROM_EMAIL") || getEnv("SMTP_FROM") || "no-reply@localhost";
   const isProd = process.env.NODE_ENV === "production";
 
@@ -30,7 +31,7 @@ export async function sendCustomerResetEmail(email: string, resetUrl: string) {
   });
 
   await transport.sendMail({
-    from,
+    from: `${fromName} <${from}>`,
     to: email,
     subject: "Reset your password",
     text: `We received a request to reset your password. Open this link: ${resetUrl}\n\nThis link expires in 30 minutes. If you did not request this, you can ignore this email.`,

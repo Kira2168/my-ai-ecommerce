@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Save, Loader2, Trash2 } from "lucide-react";
+import { Camera, Save, Loader2, Trash2, Eye, EyeOff } from "lucide-react";
 
 type Profile = {
   displayName: string;
@@ -31,6 +31,7 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
   const [account, setAccount] = useState(initialAccount);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
   const [accountSaving, setAccountSaving] = useState(false);
   const [accountMsg, setAccountMsg] = useState("");
@@ -326,13 +327,23 @@ export default function ProfileEditor({ initialProfile, initialStats, initialAcc
           </div>
           <div>
             <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">Current Password</label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 outline-none focus:border-brand"
-              placeholder="Required to change password"
-            />
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full bg-(--card-bg) border border-(--border-color) rounded-xl px-3 py-2 pr-10 outline-none focus:border-brand"
+                placeholder="Required to change password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground/80 hover:text-foreground"
+                aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+              >
+                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-[10px] font-mono uppercase tracking-widest text-foreground/50 mb-2">New Password</label>
