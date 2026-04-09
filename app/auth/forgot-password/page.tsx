@@ -9,10 +9,12 @@ export default function CustomerForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setWarning("");
     setLoading(true);
 
     try {
@@ -29,7 +31,10 @@ export default function CustomerForgotPasswordPage() {
       }
 
       if (data?.resetUrl) {
-        router.push(`/auth/reset-requested?debug=${encodeURIComponent(String(data.resetUrl))}`);
+        const debug = encodeURIComponent(String(data.resetUrl));
+        const emailSent = data?.emailSent ? "1" : "0";
+        const mailMode = encodeURIComponent(String(data?.mailMode || "unknown"));
+        router.push(`/auth/reset-requested?debug=${debug}&emailSent=${emailSent}&mailMode=${mailMode}`);
         return;
       }
 
@@ -68,6 +73,7 @@ export default function CustomerForgotPasswordPage() {
         </button>
 
         {error && <p className="text-sm text-red-300">{error}</p>}
+        {warning && <p className="text-sm text-amber-300">{warning}</p>}
 
         <p className="text-sm text-cyan-100/80">
           Back to <Link href="/" className="text-cyan-200 underline">home</Link>

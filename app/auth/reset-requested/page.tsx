@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 export default function CustomerResetRequestedPage() {
   const params = useSearchParams();
   const debugResetUrl = params.get("debug") || "";
+  const emailSent = params.get("emailSent") === "1";
+  const mailMode = params.get("mailMode") || "";
 
   return (
     <main className="min-h-screen bg-background text-foreground grid place-items-center p-6">
@@ -17,6 +19,12 @@ export default function CustomerResetRequestedPage() {
         <p className="text-sm text-foreground/70">
           Open the email and use the button to continue to the reset password page.
         </p>
+
+        {!emailSent && mailMode === "dev-fallback" ? (
+          <p className="text-xs text-amber-300">
+            SMTP is not configured yet, so no inbox email was sent. Use the direct reset link below in development.
+          </p>
+        ) : null}
 
         {debugResetUrl ? (
           <div className="rounded-xl border border-amber-300/40 bg-amber-400/10 p-3 space-y-2">

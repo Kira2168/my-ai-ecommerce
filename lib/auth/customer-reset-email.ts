@@ -19,7 +19,7 @@ export async function sendCustomerResetEmail(email: string, resetUrl: string) {
 
     // Local/dev fallback: do not fail reset flow when SMTP is not configured.
     console.log(`[reset-email:dev-fallback] to=${email} url=${resetUrl}`);
-    return;
+    return { delivered: false as const, mode: "dev-fallback" as const };
   }
 
   const transport = nodemailer.createTransport({
@@ -47,4 +47,6 @@ export async function sendCustomerResetEmail(email: string, resetUrl: string) {
       </div>
     `,
   });
+
+  return { delivered: true as const, mode: "smtp" as const };
 }

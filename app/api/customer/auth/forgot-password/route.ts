@@ -41,10 +41,15 @@ export async function POST(req: Request) {
     const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const resetUrl = `${origin}/auth/reset-password?token=${rawToken}`;
 
-    await sendCustomerResetEmail(email, resetUrl);
+    const mailResult = await sendCustomerResetEmail(email, resetUrl);
 
     if (process.env.NODE_ENV !== "production") {
-      return NextResponse.json({ success: true, resetUrl });
+      return NextResponse.json({
+        success: true,
+        resetUrl,
+        emailSent: mailResult?.delivered ?? false,
+        mailMode: mailResult?.mode ?? "unknown",
+      });
     }
 
     return NextResponse.json({ success: true });

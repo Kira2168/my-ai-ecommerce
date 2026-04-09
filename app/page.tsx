@@ -209,22 +209,24 @@ export default function Home() {
                 className="w-full bg-black/45 border border-cyan-200/20 rounded-xl py-3.5 px-4 text-white font-mono text-xs outline-none focus:border-brand placeholder:text-white/35 focus:shadow-[0_0_0_2px_rgba(0,242,255,0.18)] transition-all"
                 required
               />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="PASSWORD"
-                className="w-full bg-black/45 border border-cyan-200/20 rounded-xl py-3.5 px-4 pr-12 text-white font-mono text-xs outline-none focus:border-brand placeholder:text-white/35 focus:shadow-[0_0_0_2px_rgba(0,242,255,0.18)] transition-all"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-[68%] -translate-y-1/2 text-cyan-100/55 hover:text-cyan-100"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="PASSWORD"
+                  className="w-full bg-black/45 border border-cyan-200/20 rounded-xl py-3.5 px-4 pr-12 text-white font-mono text-xs outline-none focus:border-brand placeholder:text-white/35 focus:shadow-[0_0_0_2px_rgba(0,242,255,0.18)] transition-all"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-100/85 hover:text-cyan-100"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
 
               {mode === "login" ? (
                 <div className="text-right">

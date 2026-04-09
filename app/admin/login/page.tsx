@@ -137,7 +137,7 @@ export default function AdminLogin() {
             <button 
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white"
             >
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
