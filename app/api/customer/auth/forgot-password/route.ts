@@ -44,6 +44,13 @@ export async function POST(req: Request) {
     await sendCustomerResetEmail(email, resetUrl);
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    const message = String(error?.message || "");
+    if (message.includes("42P01") || message.includes("CustomerPasswordResetToken") || message.includes("does not exist")) {
+      return NextResponse.json(
+        { error: "Password reset is being set up. Please try again in a minute." },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: error.message || "Failed to start reset." }, { status: 500 });
   }
 }
