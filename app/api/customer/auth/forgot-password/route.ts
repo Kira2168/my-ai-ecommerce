@@ -42,6 +42,11 @@ export async function POST(req: Request) {
     const resetUrl = `${origin}/auth/reset-password?token=${rawToken}`;
 
     await sendCustomerResetEmail(email, resetUrl);
+
+    if (process.env.NODE_ENV !== "production") {
+      return NextResponse.json({ success: true, resetUrl });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     const message = String(error?.message || "");

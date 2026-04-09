@@ -27,6 +27,12 @@ export default function CustomerForgotPasswordPage() {
         setError(data.error || "Failed to request reset link.");
         return;
       }
+
+      if (data?.resetUrl) {
+        router.push(`/auth/reset-requested?debug=${encodeURIComponent(String(data.resetUrl))}`);
+        return;
+      }
+
       router.push("/auth/reset-requested");
     } catch {
       setError("Something went wrong. Please try again.");
