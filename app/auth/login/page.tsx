@@ -16,6 +16,17 @@ export default function CustomerLoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [dodgeOffset, setDodgeOffset] = useState({ x: 0, y: 0 });
+  const dodgeActive = Boolean(error) && !loading;
+  const nudgeButton = () => {
+    const goHigh = Math.random() > 0.5;
+    setDodgeOffset({
+      x: Math.floor(Math.random() * 200) - 100,
+      y: goHigh
+        ? -(Math.floor(Math.random() * 170) + 70)
+        : Math.floor(Math.random() * 170) + 40,
+    });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +42,10 @@ export default function CustomerLoginPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data?.error || "Login failed.");
+        nudgeButton();
         return;
       }
+      setDodgeOffset({ x: 0, y: 0 });
       setSuccess("Sign in successful. Redirecting...");
       setTimeout(() => router.replace(next), 900);
     } finally {
@@ -50,7 +63,10 @@ export default function CustomerLoginPage() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
             placeholder="Email"
             className="w-full rounded-xl border border-(--border-color) bg-(--card-bg-secondary) px-4 py-3 outline-none focus:border-brand"
             required
@@ -59,7 +75,10 @@ export default function CustomerLoginPage() {
             <input
               type={showPassword ? "text" : "password"}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError("");
+              }}
               placeholder="Password"
               className="w-full rounded-xl border border-(--border-color) bg-(--card-bg-secondary) px-4 py-3 pr-12 outline-none focus:border-brand"
               required
@@ -93,13 +112,25 @@ export default function CustomerLoginPage() {
             </div>
           ) : null}
           {error ? <p className="text-xs font-mono uppercase tracking-widest text-red-400">{error}</p> : null}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-brand text-black py-3 font-black uppercase tracking-widest disabled:opacity-50"
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (dodgeActive) nudgeButton();
+            }}
+            onMouseMove={() => {
+              if (dodgeActive) nudgeButton();
+            }}
+            onMouseLeave={() => setDodgeOffset({ x: 0, y: 0 })}
           >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
+            <button
+              type={dodgeActive ? "button" : "submit"}
+              disabled={loading}
+              style={{ transform: `translate(${dodgeOffset.x}px, ${dodgeOffset.y}px)` }}
+              className={`w-full rounded-xl bg-brand text-black py-3 font-black uppercase tracking-widest transition-transform duration-150 disabled:opacity-50 ${dodgeActive ? "pointer-events-none" : ""}`}
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </div>
         </form>
 
         <p className="mt-5 text-sm text-foreground/60">

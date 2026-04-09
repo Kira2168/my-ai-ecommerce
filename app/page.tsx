@@ -19,6 +19,17 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
   const [authSuccess, setAuthSuccess] = useState("");
+  const [dodgeOffset, setDodgeOffset] = useState({ x: 0, y: 0 });
+  const dodgeActive = mode === "login" && Boolean(authError) && !authLoading;
+  const nudgeButton = () => {
+    const goHigh = Math.random() > 0.5;
+    setDodgeOffset({
+      x: Math.floor(Math.random() * 220) - 110,
+      y: goHigh
+        ? -(Math.floor(Math.random() * 180) + 70)
+        : Math.floor(Math.random() * 180) + 45,
+    });
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -49,8 +60,10 @@ export default function Home() {
 
       if (!res.ok) {
         setAuthError(data?.error || "Auth failed.");
+        if (mode === "login") nudgeButton();
         return;
       }
+      setDodgeOffset({ x: 0, y: 0 });
       const successText =
         mode === "signup"
           ? "Account created successfully. Taking you to the shop..."
@@ -204,7 +217,10 @@ export default function Home() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (authError) setAuthError("");
+                }}
                 placeholder="EMAIL"
                 className="w-full bg-black/45 border border-cyan-200/20 rounded-xl py-3.5 px-4 text-white font-mono text-xs outline-none focus:border-brand placeholder:text-white/35 focus:shadow-[0_0_0_2px_rgba(0,242,255,0.18)] transition-all"
                 required
@@ -213,7 +229,10 @@ export default function Home() {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (authError) setAuthError("");
+                  }}
                   placeholder="PASSWORD"
                   className="w-full bg-black/45 border border-cyan-200/20 rounded-xl py-3.5 px-4 pr-12 text-white font-mono text-xs outline-none focus:border-brand placeholder:text-white/35 focus:shadow-[0_0_0_2px_rgba(0,242,255,0.18)] transition-all"
                   required
@@ -256,13 +275,25 @@ export default function Home() {
 
               {authError ? <p className="text-[10px] font-mono uppercase tracking-widest text-red-400">{authError}</p> : null}
 
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (dodgeActive) nudgeButton();
+                }}
+                onMouseMove={() => {
+                  if (dodgeActive) nudgeButton();
+                }}
+                onMouseLeave={() => setDodgeOffset({ x: 0, y: 0 })}
+              >
               <button
-                type="submit"
+                type={dodgeActive ? "button" : "submit"}
                 disabled={authLoading}
-                className="w-full py-3.5 rounded-xl bg-brand text-black font-black uppercase tracking-[0.3em] text-[10px] hover:brightness-110 hover:shadow-[0_0_25px_rgba(0,242,255,0.45)] transition disabled:opacity-50"
+                style={{ transform: `translate(${mode === "login" ? dodgeOffset.x : 0}px, ${mode === "login" ? dodgeOffset.y : 0}px)` }}
+                className={`w-full py-3.5 rounded-xl bg-brand text-black font-black uppercase tracking-[0.3em] text-[10px] hover:brightness-110 hover:shadow-[0_0_25px_rgba(0,242,255,0.45)] transition duration-150 disabled:opacity-50 ${dodgeActive ? "pointer-events-none" : ""}`}
               >
                 {authLoading ? "Processing..." : mode === "login" ? "Sign In" : "Create Account"}
               </button>
+              </div>
             </form>
           </div>
 
