@@ -10,9 +10,16 @@ export async function sendCustomerResetEmail(email: string, resetUrl: string) {
   const user = getEnv("SMTP_USER");
   const pass = getEnv("SMTP_PASS");
   const from = getEnv("RESET_FROM_EMAIL") || getEnv("SMTP_FROM") || "no-reply@localhost";
+  const isProd = process.env.NODE_ENV === "production";
 
   if (!host || !user || !pass) {
-    throw new Error("Missing SMTP configuration. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, RESET_FROM_EMAIL.");
+    if (isProd) {
+      throw new Error("Missing SMTP configuration. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, RESET_FROM_EMAIL.");
+    }
+
+    // Local/dev fallback: do not fail reset flow when SMTP is not configured.
+    console.log(`[reset-email:dev-fallback] to=${email} url=${resetUrl}`);
+    return;
   }
 
   const transport = nodemailer.createTransport({
