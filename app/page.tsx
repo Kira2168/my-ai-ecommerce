@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Terminal, Cpu, ShieldAlert, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Terminal, Cpu, ShieldAlert, CheckCircle2, Eye, EyeOff, Sparkles } from "lucide-react";
 import StarField from "@/components/StarField";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -240,11 +240,17 @@ export default function Home() {
               ) : null}
 
               {authSuccess ? (
-                <div className="rounded-xl border border-emerald-300/45 bg-emerald-400/10 px-3 py-2 text-emerald-200 animate-pulse">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.15em] flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" />
+                <div className="relative overflow-hidden rounded-2xl border border-cyan-300/35 bg-[linear-gradient(140deg,rgba(6,28,40,0.95),rgba(20,10,44,0.9))] px-4 py-3 text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,0.3)]">
+                  <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-cyan-300/20 blur-2xl" />
+                  <div className="absolute -left-8 -bottom-8 h-20 w-20 rounded-full bg-fuchsia-400/20 blur-2xl" />
+                  <p className="relative text-[10px] font-mono uppercase tracking-[0.15em] flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                    <Sparkles className="h-4 w-4 text-cyan-300 animate-pulse" />
                     {authSuccess}
                   </p>
+                  <div className="relative mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
+                    <div className="h-full w-full animate-pulse bg-linear-to-r from-cyan-300 via-emerald-300 to-fuchsia-300" />
+                  </div>
                 </div>
               ) : null}
 

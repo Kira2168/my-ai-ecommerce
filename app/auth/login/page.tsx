@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Sparkles } from "lucide-react";
 
 export default function CustomerLoginPage() {
   const router = useRouter();
@@ -79,11 +79,17 @@ export default function CustomerLoginPage() {
             </Link>
           </div>
           {success ? (
-            <div className="rounded-xl border border-emerald-300/40 bg-emerald-400/10 px-3 py-2 text-emerald-200 animate-pulse">
-              <p className="text-xs font-mono uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" />
+            <div className="relative overflow-hidden rounded-2xl border border-cyan-300/35 bg-[linear-gradient(140deg,rgba(6,28,40,0.95),rgba(20,10,44,0.9))] px-4 py-3 text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.28)]">
+              <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-cyan-300/20 blur-2xl" />
+              <div className="absolute -left-8 -bottom-8 h-20 w-20 rounded-full bg-fuchsia-400/20 blur-2xl" />
+              <p className="relative flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em]">
+                <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                <Sparkles className="h-4 w-4 text-cyan-300 animate-pulse" />
                 {success}
               </p>
+              <div className="relative mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full w-full animate-pulse bg-linear-to-r from-cyan-300 via-emerald-300 to-fuchsia-300" />
+              </div>
             </div>
           ) : null}
           {error ? <p className="text-xs font-mono uppercase tracking-widest text-red-400">{error}</p> : null}
