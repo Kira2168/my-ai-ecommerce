@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { X, Database, Zap, Loader2, Image as ImageIcon, Box, AlignLeft, Eye, Upload, RefreshCcw } from "lucide-react";
+import { X, Database, Zap, Loader2, Image as ImageIcon, Box, AlignLeft, Eye, Upload, RefreshCcw, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // Added initialData prop to handle editing
@@ -16,6 +16,7 @@ export default function NewDropModal({
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   
   // Initialize state. If initialData exists, we use it; otherwise, defaults.
   const [formData, setFormData] = useState({
@@ -105,6 +106,20 @@ export default function NewDropModal({
   const removeImageAt = (index: number) => {
     setFormData((prev) => {
       const images = prev.images.filter((_, i) => i !== index);
+      const image = prev.image && images.includes(prev.image) ? prev.image : images[0] || "";
+      return { ...prev, images, image };
+    });
+  };
+
+  const setCoverImage = (img: string) => {
+    setFormData((prev) => ({ ...prev, image: img }));
+  };
+
+  const moveImage = (from: number, to: number) => {
+    setFormData((prev) => {
+      const images = [...prev.images];
+      const [moved] = images.splice(from, 1);
+      images.splice(to, 0, moved);
       const image = prev.image && images.includes(prev.image) ? prev.image : images[0] || "";
       return { ...prev, images, image };
     });
@@ -252,18 +267,40 @@ export default function NewDropModal({
               </div>
               {formData.images.length > 0 ? (
                 <div className="flex gap-3 overflow-x-auto py-2">
-                  {formData.images.map((img, index) => (
-                    <div key={`${img}-${index}`} className="relative h-20 w-20 rounded-xl border border-white/10 bg-black overflow-hidden shrink-0">
-                      <img src={img} alt={`Asset ${index + 1}`} className="h-full w-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImageAt(index)}
-                        className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white/70 hover:text-white"
+                  {formData.images.map((img, index) => {
+                    const isCover = img === formData.image;
+                    return (
+                      <div
+                        key={`${img}-${index}`}
+                        className={`relative h-20 w-20 rounded-xl border ${isCover ? "border-brand" : "border-white/10"} bg-black overflow-hidden shrink-0`}
+                        draggable
+                        onDragStart={() => setDragIndex(index)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (dragIndex === null || dragIndex === index) return;
+                          moveImage(dragIndex, index);
+                          setDragIndex(null);
+                        }}
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+                        <img src={img} alt={`Asset ${index + 1}`} className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setCoverImage(img)}
+                          className={`absolute bottom-1 left-1 rounded-full bg-black/70 p-1 ${isCover ? "text-brand" : "text-white/70 hover:text-white"}`}
+                          title="Set as cover"
+                        >
+                          <Star className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeImageAt(index)}
+                          className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white/70 hover:text-white"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Optional: add 1+ images.</p>

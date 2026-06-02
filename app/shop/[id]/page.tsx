@@ -11,7 +11,10 @@ import {
   Radio, 
   Loader2,
   Check,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -35,6 +38,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [isSyncing, startTransition] = useTransition();
   const [isAdded, setIsAdded] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
   
   useEffect(() => {
     setMounted(true);
@@ -169,6 +176,35 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const imageList = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
   const mergedImages = imageList.length > 0 ? imageList : (product.image ? [product.image] : []);
   const mainImage = activeImage || mergedImages[0] || null;
+  const currentIndex = mainImage ? Math.max(0, mergedImages.indexOf(mainImage)) : 0;
+
+  const openViewer = (index: number) => {
+    if (!mergedImages[index]) return;
+    setViewerIndex(index);
+    setViewerOpen(true);
+  };
+
+  const closeViewer = () => setViewerOpen(false);
+
+  const showPrev = () => {
+    if (mergedImages.length === 0) return;
+    const nextIndex = (viewerIndex - 1 + mergedImages.length) % mergedImages.length;
+    setViewerIndex(nextIndex);
+  };
+
+  const showNext = () => {
+    if (mergedImages.length === 0) return;
+    const nextIndex = (viewerIndex + 1) % mergedImages.length;
+    setViewerIndex(nextIndex);
+  };
+
+  const handleSwipe = () => {
+    if (touchStartX === null || touchEndX === null) return;
+    const delta = touchStartX - touchEndX;
+    if (Math.abs(delta) < 40) return;
+    const nextIndex = delta > 0 ? currentIndex + 1 : currentIndex - 1;
+    if (mergedImages[nextIndex]) setActiveImage(mergedImages[nextIndex]);
+  };
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-12 transition-colors duration-700 overflow-x-hidden">
@@ -177,9 +213,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 lg:gap-20 pt-24 sm:pt-28 lg:pt-32">
         <div className="relative group">
           <div className={`absolute -inset-10 ${isSoldOut ? 'bg-red-600/10' : 'bg-brand/5'} blur-[120px] rounded-full opacity-50 pointer-events-none`} />
-          <div className={`aspect-square rounded-[2.5rem] sm:rounded-[3.5rem] bg-white/5 border ${isSoldOut ? 'border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)]' : 'border-white/10'} overflow-hidden relative backdrop-blur-3xl shadow-2xl`}>
+          <div
+            className={`aspect-square rounded-[2.5rem] sm:rounded-[3.5rem] bg-white/5 border ${isSoldOut ? 'border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)]' : 'border-white/10'} overflow-hidden relative backdrop-blur-3xl shadow-2xl`}
+            onTouchStart={(e) => setTouchStartX(e.changedTouches[0].clientX)}
+            onTouchMove={(e) => setTouchEndX(e.changedTouches[0].clientX)}
+            onTouchEnd={() => {
+              handleSwipe();
+              setTouchStartX(null);
+              setTouchEndX(null);
+            }}
+          >
             {mainImage ? (
-              <img src={mainImage} alt={product.name} className={`w-full h-full object-cover transition-all duration-700 ${isSoldOut ? 'grayscale opacity-20 scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'}`} />
+              <img
+                src={mainImage}
+                alt={product.name}
+                onClick={() => openViewer(currentIndex)}
+                className={`w-full h-full object-cover transition-all duration-700 ${isSoldOut ? 'grayscale opacity-20 scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'} ${mergedImages.length > 0 ? "cursor-zoom-in" : ""}`}
+              />
             ) : (
               <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/5 font-black text-[10rem] sm:text-[15rem] uppercase">
                 {product.name?.[0]}
@@ -195,17 +245,30 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             )}
           </div>
           {mergedImages.length > 1 ? (
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {mergedImages.map((img: string, index: number) => (
-                <button
-                  key={`${img}-${index}`}
-                  type="button"
-                  onClick={() => setActiveImage(img)}
-                  className={`h-20 w-20 shrink-0 rounded-2xl border ${img === mainImage ? "border-brand" : "border-white/10"} overflow-hidden bg-white/5`}
-                >
-                  <img src={img} alt={`View ${index + 1}`} className="h-full w-full object-cover" />
-                </button>
-              ))}
+            <div className="mt-4 space-y-3">
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {mergedImages.map((img: string, index: number) => (
+                  <button
+                    key={`${img}-${index}`}
+                    type="button"
+                    onClick={() => setActiveImage(img)}
+                    className={`h-20 w-20 shrink-0 rounded-2xl border ${img === mainImage ? "border-brand" : "border-white/10"} overflow-hidden bg-white/5`}
+                  >
+                    <img src={img} alt={`View ${index + 1}`} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                {mergedImages.map((img: string, index: number) => (
+                  <button
+                    key={`dot-${index}`}
+                    type="button"
+                    onClick={() => setActiveImage(img)}
+                    className={`h-2 w-2 rounded-full transition-all ${index === currentIndex ? "bg-brand shadow-[0_0_10px_#00f2ff]" : "bg-white/20"}`}
+                    aria-label={`View image ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
@@ -256,6 +319,42 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </button>
         </div>
       </div>
+
+      {viewerOpen && mergedImages.length > 0 ? (
+        <div className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <button
+            type="button"
+            onClick={closeViewer}
+            className="absolute top-6 right-6 rounded-full border border-white/10 bg-black/60 p-2 text-white/80 hover:text-white"
+            aria-label="Close image viewer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={showPrev}
+            className="absolute left-4 sm:left-8 rounded-full border border-white/10 bg-black/60 p-2 text-white/80 hover:text-white"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={showNext}
+            className="absolute right-4 sm:right-8 rounded-full border border-white/10 bg-black/60 p-2 text-white/80 hover:text-white"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <div className="max-w-4xl w-full">
+            <img
+              src={mergedImages[viewerIndex]}
+              alt={`Full view ${viewerIndex + 1}`}
+              className="w-full max-h-[80vh] object-contain rounded-3xl border border-white/10"
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

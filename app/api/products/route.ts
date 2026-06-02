@@ -1,11 +1,41 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+const MAX_IMAGES = 10;
+const MAX_DATA_URL_LENGTH = 2_000_000;
+
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isImageDataUrl(value: string) {
+  return /^data:image\/(png|jpe?g|gif|webp);base64,/i.test(value);
+}
+
+function sanitizeImages(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const cleaned = input
+    .map((item) => String(item || "").trim())
+    .filter(Boolean)
+    .filter((value) => {
+      if (isHttpUrl(value)) return true;
+      if (isImageDataUrl(value) && value.length <= MAX_DATA_URL_LENGTH) return true;
+      return false;
+    });
+
+  return cleaned.slice(0, MAX_IMAGES);
+}
+
 // 1. CREATE NEW ASSET
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const images = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
+    const images = sanitizeImages(body.images);
     const primaryImage = body.image || images[0] || null;
     
     const newProduct = await db.product.create({
@@ -50,12 +80,13 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Missing Asset ID" }, { status: 400 });
     }
 
+    const images = sanitizeImages(updateData.images);
     const updatedProduct = await db.product.update({
       where: { id: id },
       data: {
         ...updateData,
-        image: updateData.image || (Array.isArray(updateData.images) ? updateData.images[0] : undefined),
-        images: Array.isArray(updateData.images) ? updateData.images.filter(Boolean) : undefined,
+        image: updateData.image || images[0] || undefined,
+        images: images.length > 0 ? images : undefined,
         // Ensure numbers are correctly typed for Prisma
         price: updateData.price ? parseFloat(updateData.price) : undefined,
         stock: updateData.stock ? parseInt(updateData.stock) : undefined,
