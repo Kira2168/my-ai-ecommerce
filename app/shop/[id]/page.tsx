@@ -34,6 +34,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [mounted, setMounted] = useState(false);
   const [isSyncing, startTransition] = useTransition();
   const [isAdded, setIsAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
   
   useEffect(() => {
     setMounted(true);
@@ -165,6 +166,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const isSoldOut = currentStock <= 0;
   const isLowStock = currentStock > 0 && currentStock <= 5;
   const stockPercentage = Math.min((currentStock / 20) * 100, 100);
+  const imageList = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+  const mergedImages = imageList.length > 0 ? imageList : (product.image ? [product.image] : []);
+  const mainImage = activeImage || mergedImages[0] || null;
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-12 transition-colors duration-700 overflow-x-hidden">
@@ -174,8 +178,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         <div className="relative group">
           <div className={`absolute -inset-10 ${isSoldOut ? 'bg-red-600/10' : 'bg-brand/5'} blur-[120px] rounded-full opacity-50 pointer-events-none`} />
           <div className={`aspect-square rounded-[2.5rem] sm:rounded-[3.5rem] bg-white/5 border ${isSoldOut ? 'border-red-600/40 shadow-[0_0_50px_rgba(220,38,38,0.15)]' : 'border-white/10'} overflow-hidden relative backdrop-blur-3xl shadow-2xl`}>
-            {product.image ? (
-              <img src={product.image} alt={product.name} className={`w-full h-full object-cover transition-all duration-700 ${isSoldOut ? 'grayscale opacity-20 scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'}`} />
+            {mainImage ? (
+              <img src={mainImage} alt={product.name} className={`w-full h-full object-cover transition-all duration-700 ${isSoldOut ? 'grayscale opacity-20 scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'}`} />
             ) : (
               <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/5 font-black text-[10rem] sm:text-[15rem] uppercase">
                 {product.name?.[0]}
@@ -190,6 +194,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             )}
           </div>
+          {mergedImages.length > 1 ? (
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+              {mergedImages.map((img: string, index: number) => (
+                <button
+                  key={`${img}-${index}`}
+                  type="button"
+                  onClick={() => setActiveImage(img)}
+                  className={`h-20 w-20 shrink-0 rounded-2xl border ${img === mainImage ? "border-brand" : "border-white/10"} overflow-hidden bg-white/5`}
+                >
+                  <img src={img} alt={`View ${index + 1}`} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col justify-center">

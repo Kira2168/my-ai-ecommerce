@@ -128,8 +128,8 @@ const filteredProducts = products.filter(p => {
                 
                 {/* RESTORED: Image Zoom Effect */}
                 <div className={`w-full h-full overflow-hidden transition-all duration-700 ${isSoldOut ? "grayscale opacity-40" : "grayscale group-hover:grayscale-0 scale-110 group-hover:scale-100"}`}>
-                  {product.image ? (
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  {product.image || (Array.isArray(product.images) && product.images[0]) ? (
+                    <img src={product.image || product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-foreground/5 font-black text-9xl">{product.name[0]}</div>
                   )}

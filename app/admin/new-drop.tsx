@@ -15,6 +15,7 @@ export default function NewDropModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   
   // Initialize state. If initialData exists, we use it; otherwise, defaults.
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function NewDropModal({
     price: "",
     category: "TECH",
     image: "",      
+    images: [] as string[],
     stock: "10",    
     description: "" 
   });
@@ -36,6 +38,7 @@ export default function NewDropModal({
         price: initialData.price?.toString() || "",
         category: initialData.category || "TECH",
         image: initialData.image || "",
+        images: Array.isArray(initialData.images) ? initialData.images : (initialData.image ? [initialData.image] : []),
         stock: initialData.stock?.toString() || "10",
         description: initialData.description || ""
       });
@@ -63,20 +66,48 @@ export default function NewDropModal({
     loadCategories();
   }, [initialData]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("FILE_TOO_LARGE: Max 2MB for direct injection.");
-        return;
-      }
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    const nextImages: string[] = [];
+    for (const file of files) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("FILE_TOO_LARGE: Max 2MB per image.");
+        continue;
+      }
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(String(reader.result || ""));
+        reader.readAsDataURL(file);
+      });
+      if (dataUrl) nextImages.push(dataUrl);
     }
+
+    if (nextImages.length > 0) {
+      setFormData((prev) => {
+        const images = [...prev.images, ...nextImages];
+        return { ...prev, images, image: prev.image || images[0] || "" };
+      });
+    }
+  };
+
+  const addImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    setFormData((prev) => {
+      const images = [...prev.images, url];
+      return { ...prev, images, image: prev.image || url };
+    });
+    setImageUrlInput("");
+  };
+
+  const removeImageAt = (index: number) => {
+    setFormData((prev) => {
+      const images = prev.images.filter((_, i) => i !== index);
+      const image = prev.image && images.includes(prev.image) ? prev.image : images[0] || "";
+      return { ...prev, images, image };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +123,7 @@ export default function NewDropModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          images: formData.images,
           id: initialData?.id, // Include ID if editing
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock), 
@@ -199,16 +231,43 @@ export default function NewDropModal({
                   ref={fileInputRef} 
                   hidden 
                   accept="image/*" 
+                  multiple
                   onChange={handleFileUpload} 
                 />
               </div>
-              <input 
-                required
-                value={formData.image}
-                onChange={(e) => setFormData({...formData, image: e.target.value})}
-                className="w-full bg-black border border-white/10 rounded-xl p-4 outline-none focus:border-brand transition-all text-[9px] sm:text-[10px] text-white/60 font-mono" 
-                placeholder="Paste URL or use Memory Upload..." 
-              />
+              <div className="flex items-center gap-2">
+                <input 
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  className="flex-1 bg-black border border-white/10 rounded-xl p-4 outline-none focus:border-brand transition-all text-[9px] sm:text-[10px] text-white/60 font-mono" 
+                  placeholder="Paste image URL and press Add..." 
+                />
+                <button
+                  type="button"
+                  onClick={addImageUrl}
+                  className="px-4 py-3 rounded-xl border border-brand/40 text-brand text-[9px] font-mono uppercase tracking-widest hover:bg-brand/10"
+                >
+                  Add
+                </button>
+              </div>
+              {formData.images.length > 0 ? (
+                <div className="flex gap-3 overflow-x-auto py-2">
+                  {formData.images.map((img, index) => (
+                    <div key={`${img}-${index}`} className="relative h-20 w-20 rounded-xl border border-white/10 bg-black overflow-hidden shrink-0">
+                      <img src={img} alt={`Asset ${index + 1}`} className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImageAt(index)}
+                        className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white/70 hover:text-white"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Optional: add 1+ images.</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

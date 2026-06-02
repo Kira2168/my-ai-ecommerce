@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const images = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
+    const primaryImage = body.image || images[0] || null;
     
     const newProduct = await db.product.create({
       data: {
@@ -12,7 +14,8 @@ export async function POST(req: Request) {
         price: parseFloat(body.price),
         category: body.category,
         description: body.description || "Obsidian Grade Asset.",
-        image: body.image || null, 
+        image: primaryImage,
+        images: images.length > 0 ? images : undefined,
         stock: body.stock ? parseInt(body.stock) : 15,
       } as any, 
     });
@@ -51,6 +54,8 @@ export async function PATCH(req: Request) {
       where: { id: id },
       data: {
         ...updateData,
+        image: updateData.image || (Array.isArray(updateData.images) ? updateData.images[0] : undefined),
+        images: Array.isArray(updateData.images) ? updateData.images.filter(Boolean) : undefined,
         // Ensure numbers are correctly typed for Prisma
         price: updateData.price ? parseFloat(updateData.price) : undefined,
         stock: updateData.stock ? parseInt(updateData.stock) : undefined,
